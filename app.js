@@ -5,6 +5,8 @@ const { User, Product, Ticket, Order, Cart, initializeDatabase } = require('./da
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const app = express();
+require('dotenv').config();
+
 
 // Configure multer for file uploads
 const upload = multer({
