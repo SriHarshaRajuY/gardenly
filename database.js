@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // Connect to MongoDB with better error handling and increased timeout
 mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
