@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
-// Connect to MongoDB with better error handling and increased timeout
-mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
+require('dotenv').config(); // Load environment variables
+
+mongoose.connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 30000, // 30 seconds timeout
     bufferCommands: false // Disable command buffering
 })
@@ -12,7 +13,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
     console.error('MongoDB connection error:', err.message);
     process.exit(1); // Exit if we can't connect to the database
 });
-
 // User Schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
