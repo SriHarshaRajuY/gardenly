@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Sections for showing/hiding content
     const sections = {
         dashboard: document.getElementById('dashboardSection'),
         tickets: document.getElementById('ticketsSection'),
         ticketDetails: document.getElementById('ticketDetailsSection')
     };
 
+    // Navigation links
     const navLinks = {
         dashboard: document.getElementById('dashboardLink'),
         tickets: document.getElementById('ticketsLink')
     };
 
+    // Function to show a specific section and highlight nav link
     function showSection(sectionName) {
         Object.values(sections).forEach(section => section.classList.remove('active'));
         sections[sectionName].classList.add('active');
@@ -18,8 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navLinks[sectionName]) navLinks[sectionName].classList.add('active');
     }
 
+    // Fetch all tickets for dashboard and ticket list
     async function fetchTickets() {
         try {
+            // FETCH: Get all tickets from server
             const response = await fetch('/api/tickets');
             const tickets = await response.json();
             updateDashboard(tickets);
@@ -29,11 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fetch details of a specific ticket
     async function fetchTicketDetails(ticketId) {
         try {
+            // FETCH: Get all tickets (then find specific ticket by ID)
             const response = await fetch('/api/tickets');
             const tickets = await response.json();
             const ticket = tickets.find(t => t._id === ticketId);
+
             if (ticket) {
                 document.getElementById('ticketId').textContent = ticket._id;
                 document.getElementById('ticketRequester').textContent = ticket.requester;
@@ -79,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Update the dashboard metrics
     function updateDashboard(tickets) {
         const activeTickets = tickets.filter(t => t.status === 'Open').length;
         document.getElementById('activeTickets').textContent = activeTickets;
@@ -99,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // Update ticket list table
     function updateTicketList(tickets) {
         const tbody = document.getElementById('ticketTableBody');
         tbody.innerHTML = tickets.map(ticket => `
@@ -113,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // Attach listener for resolution form submission
     function attachResolutionFormListener(ticketId) {
         const resolutionForm = document.getElementById('resolutionForm');
         if (resolutionForm) {
@@ -121,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resolution = document.getElementById('resolution').value;
 
                 try {
+                    // FETCH: Send resolution update to server
                     const response = await fetch(`/api/tickets/${ticketId}/resolve`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -148,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Nav link click handling
     Object.keys(navLinks).forEach(key => {
         navLinks[key].addEventListener('click', (e) => {
             e.preventDefault();
@@ -156,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Click handling for ticket "View" links
     document.addEventListener('click', (e) => {
         if (e.target.matches('[data-ticket]')) {
             e.preventDefault();
@@ -164,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Show dashboard by default and fetch tickets
     showSection('dashboard');
-    fetchTickets();
+    fetchTickets(); // Initial FETCH to populate dashboard and ticket list
 });
