@@ -1,3 +1,4 @@
+
 // This file exposes the product arrays to the global scope for the search functionality
 
 // Make fertilizers products available globally
@@ -22,5 +23,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   })
-  
   
