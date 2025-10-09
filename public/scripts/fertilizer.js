@@ -304,3 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// git add .
+// git commit -m "Updated functionalities in <file_name>"
+
+// git push origin <your-branch-name>
+
