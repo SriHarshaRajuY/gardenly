@@ -1,4 +1,9 @@
+// Wait until the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ------------------------------
+    // SECTION ELEMENTS
+    // ------------------------------
     const sections = {
         home: document.getElementById('homeSection'),
         knowledgeBase: document.getElementById('knowledgeBaseSection'),
@@ -8,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         messages: document.getElementById('messagesSection')
     };
 
+    // ------------------------------
+    // NAVIGATION LINKS
+    // ------------------------------
     const navLinks = {
         home: document.getElementById('homeLink'),
         support: document.getElementById('supportLink'),
@@ -16,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
         messages: document.getElementById('messagesLink')
     };
 
+    // ------------------------------
+    // KNOWLEDGE BASE ARTICLES DATA
+    // ------------------------------
     const articles = {
         'buy-now-pay-later': {
             title: 'What is "Buy Now Pay Later" Payment Mode',
@@ -79,6 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // ------------------------------
+    // ARTICLE LISTS
+    // ------------------------------
     const articleLists = {
         'quick-help': [
             { id: 'order-status', title: 'Order Status' },
@@ -93,6 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
+    // ------------------------------
+    // HELPER FUNCTIONS
+    // ------------------------------
+
+    // Show a specific section and update navigation highlights
     function showSection(sectionName) {
         Object.values(sections).forEach(section => section.classList.remove('active'));
         sections[sectionName].classList.add('active');
@@ -101,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navLinks[sectionName]) navLinks[sectionName].classList.add('active');
     }
 
+    // Display a single article with breadcrumb navigation
     function showArticle(articleId) {
         const article = articles[articleId];
         if (!article) return;
@@ -117,10 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="modified-date">Modified on ${article.modifiedDate}</p>
             ${article.content}
         `;
-
         showSection('article');
     }
 
+    // Display article list based on category
     function showArticleList(listId) {
         const list = articleLists[listId];
         if (!list) return;
@@ -134,22 +154,24 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         content.innerHTML = `
             <h1>${listId.replace('-', ' ')}</h1>
-            <ul>
-                ${list.map(item => `<li><a href="#" data-article="${item.id}">${item.title}</a></li>`).join('')}
-            </ul>
+            <ul>${list.map(item => `<li><a href="#" data-article="${item.id}">${item.title}</a></li>`).join('')}</ul>
         `;
-
         showSection('articleList');
     }
 
+    // -----------------------------------
+    // FETCH USER TICKETS (API CALL)
+    // -----------------------------------
     async function fetchUserTickets() {
         try {
+            // 🔹 Fetch tickets from backend API
             const response = await fetch('/api/user-tickets');
-            if (!response.ok) {
-                throw new Error('Failed to fetch tickets');
-            }
+            if (!response.ok) throw new Error('Failed to fetch tickets');
+
             const tickets = await response.json();
             const tbody = document.getElementById('userTicketsTableBody');
+
+            // Populate ticket table
             tbody.innerHTML = tickets.map(ticket => `
                 <tr>
                     <td>${ticket._id}</td>
@@ -167,32 +189,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // -----------------------------------
+    // FETCH TICKET DETAILS (API CALL)
+    // -----------------------------------
     function showTicketDetails(ticketId) {
+        // 🔹 Fetch ticket details from backend API
         fetch('/api/user-tickets')
             .then(response => response.json())
             .then(tickets => {
                 const ticket = tickets.find(t => t._id === ticketId);
-                if (ticket) {
-                    sections.ticket.innerHTML = `
-                        <h1>Ticket Details</h1>
-                        <div class="ticket-details">
-                            <p><strong>ID:</strong> ${ticket._id}</p>
-                            <p><strong>Subject:</strong> ${ticket.subject}</p>
-                            <p><strong>Type:</strong> ${ticket.type}</p>
-                            <p><strong>Description:</strong> ${ticket.description}</p>
-                            <p><strong>Status:</strong> ${ticket.status}</p>
-                            <p><strong>Expert:</strong> ${ticket.expert_id ? ticket.expert_id.username : 'Unassigned'}</p>
-                            <p><strong>Resolution:</strong> ${ticket.resolution || 'Pending'}</p>
-                            ${ticket.attachment ? `<p><strong>Attachment:</strong><br><img src="${ticket.attachment}" alt="Attachment" style="max-width: 100%;"></p>` : ''}
-                            <button class="cancel-btn" id="backToMessages">Back to Messages</button>
-                        </div>
-                    `;
-                    document.getElementById('backToMessages').addEventListener('click', () => {
-                        showSection('messages');
-                        fetchUserTickets();
-                    });
-                    showSection('ticket');
-                }
+                if (!ticket) return;
+
+                sections.ticket.innerHTML = `
+                    <h1>Ticket Details</h1>
+                    <div class="ticket-details">
+                        <p><strong>ID:</strong> ${ticket._id}</p>
+                        <p><strong>Subject:</strong> ${ticket.subject}</p>
+                        <p><strong>Type:</strong> ${ticket.type}</p>
+                        <p><strong>Description:</strong> ${ticket.description}</p>
+                        <p><strong>Status:</strong> ${ticket.status}</p>
+                        <p><strong>Expert:</strong> ${ticket.expert_id ? ticket.expert_id.username : 'Unassigned'}</p>
+                        <p><strong>Resolution:</strong> ${ticket.resolution || 'Pending'}</p>
+                        ${ticket.attachment ? `<p><strong>Attachment:</strong><br><img src="${ticket.attachment}" alt="Attachment" style="max-width: 100%;"></p>` : ''}
+                        <button class="cancel-btn" id="backToMessages">Back to Messages</button>
+                    </div>
+                `;
+
+                // Go back to messages
+                document.getElementById('backToMessages').addEventListener('click', () => {
+                    showSection('messages');
+                    fetchUserTickets();
+                });
+                showSection('ticket');
             })
             .catch(error => {
                 console.error('Error fetching ticket details:', error);
@@ -200,29 +228,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // ------------------------------
+    // NAVIGATION EVENT HANDLERS
+    // ------------------------------
     Object.keys(navLinks).forEach(key => {
-        navLinks[key].addEventListener('click', (e) => {
-            // Allow default navigation for 'home' and 'support' links
-            if (key === 'home' || key === 'support') {
-                return; // Let the browser handle the href navigation
-            }
+        navLinks[key].addEventListener('click', e => {
+            if (key === 'home' || key === 'support') return; // allow default
             e.preventDefault();
             showSection(key);
-            if (key === 'messages') {
-                fetchUserTickets();
-            }
+            if (key === 'messages') fetchUserTickets();
         });
     });
 
-    document.getElementById('browseArticlesCard').addEventListener('click', () => {
-        showSection('knowledgeBase');
-    });
+    // Cards navigation
+    document.getElementById('browseArticlesCard').addEventListener('click', () => showSection('knowledgeBase'));
+    document.getElementById('submitTicketCard').addEventListener('click', () => showSection('ticket'));
 
-    document.getElementById('submitTicketCard').addEventListener('click', () => {
-        showSection('ticket');
-    });
-
-    document.addEventListener('click', (e) => {
+    // Handle clicks for dynamic article/ticket links
+    document.addEventListener('click', e => {
         if (e.target.matches('[data-article]')) {
             e.preventDefault();
             showArticle(e.target.dataset.article);
@@ -238,14 +261,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Feedback buttons
     document.querySelectorAll('.feedback-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', e => {
             alert(`Feedback recorded: ${e.target.dataset.value}`);
         });
     });
 
+    // -----------------------------------
+    // SUBMIT TICKET FORM (API CALL)
+    // -----------------------------------
     const ticketForm = document.getElementById('ticketForm');
-    ticketForm.addEventListener('submit', async (e) => {
+    ticketForm.addEventListener('submit', async e => {
         e.preventDefault();
 
         const formData = new FormData();
@@ -253,16 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('subject', document.getElementById('subject').value);
         formData.append('type', document.getElementById('type').value);
         formData.append('description', document.getElementById('description').value);
+
         const attachment = document.getElementById('attachment').files[0];
-        if (attachment) {
-            formData.append('attachment', attachment);
-        }
+        if (attachment) formData.append('attachment', attachment);
 
         try {
-            const response = await fetch('/submit-ticket', {
-                method: 'POST',
-                body: formData
-            });
+            // 🔹 Submit new ticket to backend API
+            const response = await fetch('/submit-ticket', { method: 'POST', body: formData });
             const result = await response.json();
 
             if (response.ok) {
@@ -278,10 +302,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Cancel button inside ticket form
     ticketForm.querySelector('.cancel-btn').addEventListener('click', () => {
         ticketForm.reset();
         showSection('home');
     });
 
+    // Show home section by default
     showSection('home');
 });
