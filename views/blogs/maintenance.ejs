@@ -1,77 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Define character encoding for proper text rendering -->
     <meta charset="UTF-8">
+    <!-- Ensure responsive design for various devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
+    <!-- Set page title -->
+    <title>Garden Maintenance - Gardenly</title>
+    <!-- Link to external stylesheet for blog list styling -->
     <link rel="stylesheet" href="../../public/styles/blogs/list.css">
 </head>
 <body>
-
+    <!-- Navigation bar for site-wide links -->
     <div class="navbar">
         <div class="navbar-content">
+            <!-- Site logo -->
             <div class="logo">Gardenly</div>
+            <!-- Navigation links container -->
             <nav class="nav-links">
                 <a href="/">Home</a>
-                <a href="/login">Login</a>
-                <a href="/blog">blogs</a>
+                <a href="/blog">Blogs</a>
                 <a href="/expert_support">Expert Support</a>
+                <a href="/login">Login</a>
             </nav>
         </div>
     </div>
-        
-        <div class="blog-container">
-            <article class="blog-item">
-                <div class="blog-img">
-                    <img src="../../public/images/blogs/m1.webp" alt="Blog Image 1">
-                </div>
-                <div class="blog-content">
-                    <span class="blog-date">Feruary 3, 2025</span>
-                    <h2 class="blog-title">No More Curling Plants This Summer- Here's How to Treat Leaf Curl!!</h2>
-                    <p class="blog-description">Imagine stepping into your garden on a bright summer morning, only to find your beloved plants looking like they just woke up on the wrong side of the bed—leaves curling inwards, drooping, or twisting in strange directions.
 
-                        Yep, that’s leaf curl, and it’s your plant’s way of waving a little distress flag. </p>
-                    
-                </div>
-            </article>
-            
-            <article class="blog-item">
-                <div class="blog-img">
-                    <img src="../../public/images/blogs/m2.webp" alt="Blog Image 2">
-                </div>
-                <div class="blog-content">
-                    <span class="blog-date">January 8, 2025</span>
-                    <h2 class="blog-title">This Summer, Water Smart! - 5 Products that Will Make Summer a Breeze</h2>
-                    <p class="blog-description">Worried about keeping your plants properly hydrated this summer? We understand! Summer watering is a serious concern for plant parents everywhere because plants that generally need water only once a week, suddenly seem to dry out within two days.</p>
-                    
-                </div>
-            </article>
-            
-            <article class="blog-item">
-                <div class="blog-img">
-                    <img src="../../public/images/blogs/m3.webp" alt="Blog Image 3">
-                </div>
-                <div class="blog-content">
-                    <span class="blog-date">March 5, 2025</span>
-                    <h2 class="blog-title">Overwatered Your Plant? Here's How You Can Save It!</h2>
-                    <p class="blog-description">Unfortunately, overwatered plants are a more common issue than you'd think. It can get pretty difficult to gauge whether or not you've watered your plant enough and sometimes, you might just pour a little extra thinking it wasn't enough.  </p>
-                    
-                </div>
-            </article>
-            <article class="blog-item">
-                <div class="blog-img">
-                    <img src="../../public/images/blogs/m4.webp" alt="Blog Image 3">
-                </div>
-                <div class="blog-content">
-                    <span class="blog-date">January 30, 2025</span>
-                    <h2 class="blog-title">How to Water Indoor Plants: Say Goodbye to Improper Watering!</h2>
-                    <p class="blog-description">Knowing how, when, and how much to water your indoor plants is quite literally the key to keeping them alive. While to some this might come as second nature, it isn't easy for everyone - especially when they are just getting introduced to the world of gardening.</p>
-                    
-                </div>
-            </article>
-        </div>
+    <!-- Main content section for blog listings -->
+    <section class="blog-container">
+        <!-- Blog article for leaf curl treatment -->
+        <article class="blog-item">
+            <div class="blog-img">
+                <!-- Image for the blog post -->
+                <img src="../../public/images/blogs/m1.webp" alt="Leaf Curl Treatment">
+            </div>
+            <div class="blog-content">
+                <!-- Publication date of the blog -->
+                <span class="blog-date">February 3, 2025</span>
+                <!-- Blog title -->
+                <h2 class="blog-title">No More Curling Plants This Summer- Here's How to Treat Leaf Curl!!</h2>
+                <!-- Brief description of the blog content -->
+                <p class="blog-description">
+                    Imagine stepping into your garden on a bright summer morning, only to find your beloved plants
+                    looking like they just woke up on the wrong side of the bed—leaves curling inwards, drooping, or
+                    twisting in strange directions. Yep, that’s leaf curl, and it’s your plant’s way of waving a little
+                    distress flag.
+                </p>
+            </div>
+        </article>
+
+        <!-- Blog article for summer watering products -->
+        <article class="blog-item">
+            <div class="blog-img">
+                <!-- Image for the blog post -->
+                <img src="../../public/images/blogs/m2.webp" alt="Summer Watering Products">
+            </div>
+            <div class="blog-content">
+                <!-- Publication date of the blog -->
+                <span class="blog-date">January 8, 2025</span>
+                <!-- Blog title -->
+                <h2 class="blog-title">This Summer, Water Smart! - 5 Products that Will Make Summer a Breeze</h2>
+                <!-- Brief description of the blog content -->
+                <p class="blog-description">
+                    Worried about keeping your plants properly hydrated this summer? We understand! Summer watering is a
+                    serious concern for plant parents everywhere because plants that generally need water only once a
+                    week, suddenly seem to dry out within two days.
+                </p>
+            </div>
+        </article>
+
+        <!-- Blog article for overwatered plants -->
+        <article class="blog-item">
+            <div class="blog-img">
+                <!-- Image for the blog post -->
+                <img src="../../public/images/blogs/m3.webp" alt="Overwatered Plant Recovery">
+            </div>
+            <div class="blog-content">
+                <!-- Publication date of the blog -->
+                <span class="blog-date">March 5, 2025</span>
+                <!-- Blog title -->
+                <h2 class="blog-title">Overwatered Your Plant? Here's How You Can Save It!</h2>
+                <!-- Brief description of the blog content -->
+                <p class="blog-description">
+                    Unfortunately, overwatered plants are a more common issue than you'd think. It can get pretty
+                    difficult to gauge whether or not you've watered your plant enough and sometimes, you might just pour
+                    a little extra thinking it wasn’t enough.
+                </p>
+            </div>
+        </article>
+
+        <!-- Blog article for indoor plant watering -->
+        <article class="blog-item">
+            <div class="blog-img">
+                <!-- Image for the blog post -->
+                <img src="../../public/images/blogs/m4.webp" alt="Indoor Plant Watering Guide">
+            </div>
+            <div class="blog-content">
+                <!-- Publication date of the blog -->
+                <span class="blog-date">January 30, 2025</span>
+                <!-- Blog title -->
+                <h2 class="blog-title">How to Water Indoor Plants: Say Goodbye to Improper Watering!</h2>
+                <!-- Brief description of the blog content -->
+                <p class="blog-description">
+                    Knowing how, when, and how much to water your indoor plants is quite literally the key to keeping them
+                    alive. While to some this might come as second nature, it isn’t easy for everyone - especially when
+                    they are just getting introduced to the world of gardening.
+                </p>
+            </div>
+        </article>
     </section>
 </body>
-
 </html>

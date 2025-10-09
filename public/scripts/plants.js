@@ -1,8 +1,8 @@
-// Get products from the data attribute
+// 🌿 Get products data from the HTML element (data attribute)
 const productsData = document.getElementById('products-data');
 const products = JSON.parse(productsData.dataset.products);
 
-// Helper function to create star rating
+// ⭐ Helper function to create star rating dynamically using SVG icons
 function createStarRating(rating) {
     return Array(5).fill('').map((_, index) => 
         `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${index < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${index < rating ? 'text-yellow-400' : 'text-gray-300'}">
@@ -11,7 +11,7 @@ function createStarRating(rating) {
     ).join('');
 }
 
-// Render product cards
+// 🪴 Function to render product cards dynamically on the page
 function renderProducts(productList = products) {
     const productsGrid = document.getElementById('products-grid');
     productsGrid.innerHTML = productList.map(product => `
@@ -30,24 +30,26 @@ function renderProducts(productList = products) {
         </div>
     `).join('');
 
-    // Attach event listeners to Add to Cart buttons
+    // 🎯 Add event listeners for all "Add to Cart" buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Prevent other click events
+            e.stopPropagation(); // prevent event bubbling
             const productId = button.dataset.id;
             const product = products.find(p => p.id === productId);
+
+            // Check if product is available before adding to cart
             if (product && product.inStock) {
-                console.log('Adding to cart:', product); // Debug log
+                console.log('Adding to cart:', product);
                 await addToCart({
                     id: product.id,
                     name: product.name,
-                    price: parseFloat(product.price), // Ensure price is a number
+                    price: parseFloat(product.price),
                     image: product.image,
                     rating: product.rating,
                     description: product.description || 'No description available',
                     inStock: product.inStock,
                     quantity: 1,
-                    category: product.category || 'Plants' // Use product.category
+                    category: product.category || 'Plants'
                 });
             } else {
                 console.error('Product not found or out of stock:', productId);
@@ -57,18 +59,22 @@ function renderProducts(productList = products) {
     });
 }
 
-// Add to cart function
+// 🛒 Add to Cart functionality
 async function addToCart(product) {
     try {
+        // ✅ Fetch 1: Check if user is authenticated
         const response = await fetch('/api/check-auth', {
-            credentials: 'include'
+            credentials: 'include' // include cookies/session data
         });
+
         const authData = await response.json();
         if (!authData.isAuthenticated) {
+            // redirect to login if not logged in
             window.location.href = '/login';
             return;
         }
 
+        // ✅ Fetch 2: Send POST request to add product to the cart
         const cartResponse = await fetch('/api/cart/add', {
             method: 'POST',
             headers: {
@@ -80,8 +86,11 @@ async function addToCart(product) {
             })
         });
 
+        // Parse server response
         const cartData = await cartResponse.json();
+
         if (cartResponse.ok) {
+            // ✅ Update UI for feedback when product is added successfully
             const button = document.querySelector(`.add-to-cart-btn[data-id="${product.id}"]`);
             if (button) {
                 button.innerHTML = '<i class="fas fa-check"></i> Added';
@@ -93,25 +102,21 @@ async function addToCart(product) {
             }
             alert(`${product.name} has been added to your cart!`);
         } else {
+            // ❌ Handle backend error response
             alert(cartData.message || 'Failed to add product to cart');
         }
     } catch (error) {
+        // ⚠️ Handle network or unexpected errors
         console.error('Error adding to cart:', error);
         alert('Failed to add product to cart');
     }
 }
 
-// Filter and sort products
+// 🔍 Apply filters and sorting based on user selections
 function applyFiltersAndSort() {
     let filteredProducts = [...products];
 
-    // Material filter
-    // const selectedMaterials = Array.from(document.querySelectorAll('.filter-material:checked')).map(cb => cb.value);
-    // if (selectedMaterials.length > 0) {
-    //     filteredProducts = filteredProducts.filter(product => selectedMaterials.includes(product.material));
-    // }
-
-    // Price filter
+    // 💰 Filter by price range
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -123,7 +128,7 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Availability filter
+    // 🟢 Filter by availability (in stock / out of stock)
     const selectedAvailability = Array.from(document.querySelectorAll('.filter-availability:checked')).map(cb => cb.value);
     if (selectedAvailability.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -133,7 +138,7 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Rating filter
+    // ⭐ Filter by minimum rating
     const selectedRatings = Array.from(document.querySelectorAll('.filter-rating:checked')).map(cb => parseInt(cb.value));
     if (selectedRatings.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedRatings.some(rating => product.rating >= rating));
@@ -142,16 +147,17 @@ function applyFiltersAndSort() {
     return filteredProducts;
 }
 
-// Initialize the page
+// 🚀 Initialize everything once the page is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    renderProducts();
+    renderProducts(); // show all products initially
 
+    // 🏠 Home button navigation
     const homeBtn = document.querySelector('.home-btn');
     homeBtn.addEventListener('click', () => {
         window.location.href = '/';
     });
 
-    // Sort menu toggle and functionality
+    // 🔽 Sort menu functionality
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
     const sortItems = sortMenu.querySelectorAll('li');
@@ -161,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortMenu.classList.toggle('active');
     });
 
+    // 🧩 Sorting logic based on user choice
     sortItems.forEach(item => {
         item.addEventListener('click', () => {
             const sortType = item.textContent;
@@ -175,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (sortType === 'Name, A to Z') {
                 sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
             } else if (sortType === 'Name, Z to A') {
-                sortedProducts.sort((a, b) => b.name.localeCompare(b.name));
+                sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
             }
 
             renderProducts(sortedProducts);
@@ -183,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Filter menu toggle and functionality
+    // ⚙️ Filter menu functionality
     const filterBtn = document.querySelector('.filter-btn');
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');
@@ -193,12 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
         filterMenu.classList.toggle('active');
     });
 
+    // Apply filters when user clicks “Apply”
     applyFiltersBtn.addEventListener('click', () => {
         const filteredProducts = applyFiltersAndSort();
         renderProducts(filteredProducts);
         filterMenu.classList.remove('active');
     });
 
+    // Close menus when clicking outside
     document.addEventListener('click', (e) => {
         if (!sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
             sortMenu.classList.remove('active');
