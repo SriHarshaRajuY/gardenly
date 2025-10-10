@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   // DOM Elements
   const themeToggle = document.getElementById("theme-toggle")
@@ -72,8 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
   })
-
- 
 
   // Settings Form
   if (settingsForm) {
@@ -229,27 +226,36 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(initCharts, 100)
   })
 })
+
+// =======================
+// FETCH CALLS WITH DETAILED COMMENTS
+// =======================
+
+// Add product button (local server at port 7000)
 document.getElementById("add-product-btn").addEventListener("click", () => {
   const name = document.getElementById("product-name").value;
   const price = parseFloat(document.getElementById("product-price").value);
   const quantity = parseInt(document.getElementById("product-quantity").value, 10);
 
   if (name && !isNaN(price) && !isNaN(quantity)) {
+      // Make a POST request to add a product
       fetch("http://localhost:7000/add-product", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, price, quantity })
+          method: "POST", // HTTP method: POST to send new data
+          headers: { "Content-Type": "application/json" }, // Content type is JSON
+          body: JSON.stringify({ name, price, quantity }) // Convert JS object to JSON string
       })
-      .then(response => response.json())
+      .then(response => response.json()) // Parse JSON response from server
       .then(data => {
-          alert(data.message);
-          loadProducts();
+          alert(data.message); // Show server response message
+          loadProducts(); // Reload the product list after adding
       })
-      .catch(error => console.error("Error:", error));
+      .catch(error => console.error("Error:", error)); // Catch any network or server errors
   } else {
       alert("Please enter valid product details.");
   }
 });
+
+// Add product form submission (relative path /addproduct)
 document.getElementById('addProductForm').addEventListener('submit', async (e) => {
   e.preventDefault(); // Prevent page refresh
 
@@ -264,39 +270,41 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
   };
 
   try {
+    // Make a POST request to /addproduct endpoint
     const response = await fetch('/addproduct', {
-      method: 'POST',
+      method: 'POST', // HTTP POST to submit new product
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json', // Sending JSON data
       },
-      body: JSON.stringify(productData),
+      body: JSON.stringify(productData), // Convert JS object to JSON string
     });
 
     if (response.ok) {
       alert('Product added successfully');
-      window.location.href = "/sellerdashboard"; // Redirect to seller dashboard
+      window.location.href = "/sellerdashboard"; // Redirect to seller dashboard after success
     } else {
-      const errorData = await response.json();
+      const errorData = await response.json(); // Parse error message from server
       alert(`Failed to add product: ${errorData.message}`);
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error:', error); // Catch network or server errors
     alert('An error occurred while adding the product');
   }
 });
 
+// Load products function
 function loadProducts() {
+  // Make a GET request to retrieve products from the server
   fetch("http://localhost:3000/get-products")
-      .then(response => response.json())
+      .then(response => response.json()) // Parse the JSON response
       .then(data => {
           const productList = document.getElementById("product-list");
-          productList.innerHTML = "";
+          productList.innerHTML = ""; // Clear previous list
           data.forEach(row => {
               const li = document.createElement("li");
               li.textContent = `${row.name} - $${row.price} - Quantity: ${row.quantity}`;
-              productList.appendChild(li);
+              productList.appendChild(li); // Add each product to the list
           });
       })
-      .catch(error => console.error("Error:", error));
+      .catch(error => console.error("Error:", error)); // Handle any fetch errors
 }
-
