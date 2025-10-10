@@ -1,15 +1,16 @@
+// cart.js
 let cart = [];
 
 // Load cart from server
-async function loadCart() {
+async function loadCart() {  // async: Allows the function to perform asynchronous operations like fetching data from the server without blocking the main thread
     try {
-        const response = await fetch('/api/cart', {
+        const response = await fetch('/api/cart', {  // fetch: Makes an asynchronous HTTP GET request to retrieve the user's cart data from the server API
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the parsing of the JSON response from the fetch request
         if (response.ok) {
             cart = data.items || [];
         } else {
@@ -71,20 +72,20 @@ function renderCart() {
 }
 
 // Update quantity
-async function updateQuantity(productId, change) {
+async function updateQuantity(productId, change) {  // async: Enables asynchronous update of cart item quantity by sending a request to the server
     const product = cart.find((p) => p.product_id === productId);
     if (!product) return;
 
     const newQuantity = Math.max(1, product.quantity + change);
     try {
-        const response = await fetch('/api/cart/update', {
+        const response = await fetch('/api/cart/update', {  // fetch: Sends an asynchronous HTTP PUT request to update the quantity of a specific product in the cart on the server
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ product_id: productId, quantity: newQuantity })
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON parsing of the server response after the fetch update
         if (response.ok) {
             product.quantity = newQuantity;
             renderCart();
@@ -98,15 +99,15 @@ async function updateQuantity(productId, change) {
 }
 
 // Remove item
-async function removeItem(productId) {
+async function removeItem(productId) {  // async: Allows asynchronous removal of a cart item by making a server request
     try {
-        const response = await fetch(`/api/cart/remove/${productId}`, {
+        const response = await fetch(`/api/cart/remove/${productId}`, {  // fetch: Performs an asynchronous HTTP DELETE request to remove a specific product from the cart on the server
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON response from the server after the fetch deletion
         if (response.ok) {
             cart = cart.filter((p) => p.product_id !== productId);
             renderCart();
@@ -120,15 +121,15 @@ async function removeItem(productId) {
 }
 
 // Clear cart
-async function clearCart() {
+async function clearCart() {  // async: Facilitates asynchronous clearing of the entire cart via a server request
     try {
-        const response = await fetch('/api/cart/clear', {
+        const response = await fetch('/api/cart/clear', {  // fetch: Executes an asynchronous HTTP DELETE request to clear all items from the user's cart on the server
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the server's JSON response after the fetch clear operation
         if (response.ok) {
             cart = [];
             renderCart();
@@ -180,7 +181,7 @@ function closeModal() {
 }
 
 // Add to cart
-async function addToCart(product) {
+async function addToCart(product) {  // async: Supports asynchronous addition of a product to the cart by interacting with the server
     try {
         if (!product || !product.product_id) {
             console.error('Invalid product data:', product);
@@ -188,16 +189,16 @@ async function addToCart(product) {
             return;
         }
 
-        const response = await fetch('/api/cart/add', {
+        const response = await fetch('/api/cart/add', {  // fetch: Initiates an asynchronous HTTP POST request to add a product to the user's cart on the server with the specified quantity
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ product_id: product.product_id, quantity: 1 })
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON response from the server after the fetch add operation
         if (response.ok) {
-            await loadCart();
+            await loadCart();  // Awaits reloading the cart after successful addition
             alert(`${product.name} has been added to your cart!`);
         } else {
             console.error('Failed to add to cart:', data.message);
@@ -262,7 +263,7 @@ function validateForm(customerName, address, phoneNumber, email, paymentMethod) 
 }
 
 // Submit order
-async function submitOrder() {
+async function submitOrder() {  // async: Handles asynchronous submission of the order to the server, including cart items and customer details
     const customerName = document.getElementById("customer-name").value.trim();
     const address = document.getElementById("address").value.trim();
     const phoneNumber = document.getElementById("phone-number").value.trim();
@@ -275,7 +276,7 @@ async function submitOrder() {
     }
 
     try {
-        const response = await fetch('/api/delivery/create-order', {
+        const response = await fetch('/api/delivery/create-order', {  // fetch: Sends an asynchronous HTTP POST request to create a new order on the server with customer info, payment details, and cart items
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -290,7 +291,7 @@ async function submitOrder() {
                 items: cart
             })
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON response from the server after order creation
         if (response.ok) {
             alert(`Order placed successfully! Order ID: ${data.orderId}`);
             cart = [];

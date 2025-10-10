@@ -63,12 +63,12 @@ function createStarRatingSVG(rating) {
 }
 
 // Check if user is logged in
-async function isLoggedIn() {
+async function isLoggedIn() {  // async: Performs an asynchronous check of user authentication status by fetching from the server
     try {
-        const response = await fetch('/api/check-auth', {
+        const response = await fetch('/api/check-auth', {  // fetch: Makes an asynchronous HTTP request to the server to verify if the user is logged in, including credentials for session-based auth
             credentials: 'include'
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON parsing of the authentication check response
         return data.isAuthenticated;
     } catch (error) {
         console.error('Error checking authentication:', error);
@@ -155,7 +155,7 @@ function showProductDetail(productId) {
             }
         });
 
-        addToCartBtn.addEventListener('click', async () => {
+        addToCartBtn.addEventListener('click', async () => {  // async: Awaits the add to cart operation within the product detail modal
             await handleAddToCart(productId, quantity);
         });
     }
@@ -184,8 +184,8 @@ function handleProductAction(action, productId) {
 }
 
 // Handle add to cart with login check
-async function handleAddToCart(productId, quantity) {
-    const loggedIn = await isLoggedIn();
+async function handleAddToCart(productId, quantity) {  // async: Manages asynchronous addition to cart, including login check and server request
+    const loggedIn = await isLoggedIn();  // Awaits the asynchronous login status check
     if (!loggedIn) {
         window.location.href = '/login';
         return;
@@ -220,14 +220,14 @@ async function handleAddToCart(productId, quantity) {
     }
 
     try {
-        const response = await fetch('/api/cart/add', {
+        const response = await fetch('/api/cart/add', {  // fetch: Performs an asynchronous HTTP POST request to add the product to the cart on the server, including quantity
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ product_id: product.id, quantity })
         });
-        const data = await response.json();
+        const data = await response.json();  // Awaits the JSON response from the server after the add to cart fetch
         if (response.ok) {
             const addToCartBtn = document.querySelector(`[data-product-id="${productId}"] .add-to-cart-btn`) || 
                                 document.querySelector('#product-detail .add-to-cart-btn');
@@ -282,11 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const addToCartBtn = box.querySelector('.add-to-cart-btn');
         if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', async (e) => {
+            addToCartBtn.addEventListener('click', async (e) => {  // async: Awaits the add to cart functionality when the button is clicked
                 e.preventDefault();
                 const productId = box.getAttribute('data-product-id');
                 const quantity = parseInt(box.querySelector('input[type="number"]')?.value || '1');
-                await handleAddToCart(productId, quantity);
+                await handleAddToCart(productId, quantity);  // Awaits the asynchronous add to cart operation
             });
         }
 
