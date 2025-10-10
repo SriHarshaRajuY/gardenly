@@ -60,18 +60,6 @@
                 <img src="../public/images/category-badges/pots-badge.png" alt="Pots">
                 <p>POTS</p>
             </a>
-            <!-- <a href="/fertilizers" class="category-item">
-                <img src="../public/images/category-badges/fertilizers-badge.png" alt="Fertilizers">
-                <p>FERTILIZERS</p>
-            </a> -->
-            <!-- <a href="/pebbles" class="category-item">
-                <img src="../public/images/category-badges/pebbles-badge.png" alt="Pebbles">
-                <p>PEBBLES</p>
-            </a> -->
-            <!-- <a href="/tools" class="category-item">
-                <img src="../public/images/category-badges/accessories-badge.png" alt="Accessories">
-                <p>ACCESSORIES</p>
-            </a> -->
         </div>
     </section>
 
@@ -104,7 +92,7 @@
                         <input type="number" min="1" max="<%= product.available %>" value="1">
                     </div>
                     <div class="price">
-                        $<%= product.price.toFixed(2) %> <span>$<%= product.originalPrice.toFixed(2) %></span>
+                        ₹<%= product.price.toFixed(2) %> <% if (product.originalPrice) { %><span>₹<%= product.originalPrice.toFixed(2) %></span><% } %>
                     </div>
                     <div class="available">
                         <span>Available: <%= product.available %></span>
@@ -114,29 +102,6 @@
             <% }) %>
         </div>
     </section>
-
-    <!-- Best Products -->
-    <!-- <section class="sell" id="best">
-        <h1 class="heading">Our Best Product</h1>
-        <div class="line"></div>
-        <div class="box-container">
-            <% bestProducts.forEach(product => { %>
-                <div class="box" data-product-id="<%= product.id %>">
-                    <div class="image">
-                        <img src="<%= product.image %>" alt="<%= product.name %>" loading="lazy">
-                    </div>
-                    <div class="content">
-                        <h3><%= product.name %></h3>
-                        <div class="icons">
-                            <i class="fas fa-shopping-cart"></i>
-                            <i class="fas fa-heart"></i>
-                            <i class="fas fa-eye"></i>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-    </section> -->
 
     <!-- Product Detail Popup -->
     <div class="product-detail" id="product-detail">
