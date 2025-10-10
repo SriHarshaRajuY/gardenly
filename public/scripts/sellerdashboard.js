@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const addProductBtn = document.getElementById("add-product-btn")
   const settingsForm = document.getElementById("settings-form")
 
-  // Initialize Charts
   initCharts()
 
   // Toggle Theme
