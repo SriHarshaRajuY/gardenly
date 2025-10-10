@@ -1,18 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Sections for showing/hiding content
     const sections = {
         dashboard: document.getElementById('dashboardSection'),
         tickets: document.getElementById('ticketsSection'),
         ticketDetails: document.getElementById('ticketDetailsSection')
     };
 
-    // Navigation links
     const navLinks = {
         dashboard: document.getElementById('dashboardLink'),
         tickets: document.getElementById('ticketsLink')
     };
 
-    // Function to show a specific section and highlight nav link
     function showSection(sectionName) {
         Object.values(sections).forEach(section => section.classList.remove('active'));
         sections[sectionName].classList.add('active');
@@ -21,26 +18,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navLinks[sectionName]) navLinks[sectionName].classList.add('active');
     }
 
-    // Fetch all tickets for dashboard and ticket list
     async function fetchTickets() {
         try {
-            // FETCH: Get all tickets from server
             const response = await fetch('/api/tickets');
+            if (!response.ok) throw new Error('Failed to fetch tickets');
+            
             const tickets = await response.json();
             updateDashboard(tickets);
             updateTicketList(tickets);
         } catch (error) {
             console.error('Error fetching tickets:', error);
+            alert('Error fetching tickets');
         }
     }
 
-    // Fetch details of a specific ticket
     async function fetchTicketDetails(ticketId) {
         try {
-            // FETCH: Get all tickets (then find specific ticket by ID)
-            const response = await fetch('/api/tickets');
-            const tickets = await response.json();
-            const ticket = tickets.find(t => t._id === ticketId);
+            const response = await fetch(`/api/tickets/${ticketId}`);
+            if (!response.ok) throw new Error('Failed to fetch ticket details');
+            
+            const ticket = await response.json();
 
             if (ticket) {
                 document.getElementById('ticketId').textContent = ticket._id;
@@ -61,7 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const resolutionFormContainer = document.getElementById('resolutionFormContainer');
                 if (ticket.status === 'Resolved') {
-                    resolutionFormContainer.innerHTML = `<p><strong>Resolution:</strong> ${ticket.resolution}</p>`;
+                    resolutionFormContainer.innerHTML = `
+                        <h2>Resolution</h2>
+                        <div class="resolution-display">
+                            <p><strong>Resolution Provided:</strong></p>
+                            <p>${ticket.resolution}</p>
+                            <p><strong>Resolved at:</strong> ${new Date(ticket.resolved_at).toLocaleString()}</p>
+                        </div>
+                        <button type="button" class="cancel-btn" onclick="showSection('tickets')">Back to Tickets</button>
+                    `;
                 } else {
                     resolutionFormContainer.innerHTML = `
                         <h2>Provide Resolution</h2>
@@ -72,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div class="form-actions">
                                 <button type="button" class="cancel-btn" id="cancelResolution">Cancel</button>
-                                <button type="submit" class="submit-btn">Send</button>
+                                <button type="submit" class="submit-btn">Send Resolution</button>
                             </div>
                         </form>
                     `;
@@ -87,13 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Update the dashboard metrics
     function updateDashboard(tickets) {
         const activeTickets = tickets.filter(t => t.status === 'Open').length;
         document.getElementById('activeTickets').textContent = activeTickets;
 
         const today = new Date().toISOString().split('T')[0];
-        const resolvedToday = tickets.filter(t => t.status === 'Resolved' && new Date(t.created_at).toISOString().split('T')[0] === today).length;
+        const resolvedToday = tickets.filter(t => 
+            t.status === 'Resolved' && 
+            t.resolved_at && 
+            new Date(t.resolved_at).toISOString().split('T')[0] === today
+        ).length;
         document.getElementById('resolvedToday').textContent = resolvedToday;
 
         const recentTicketsBody = document.getElementById('recentTicketsBody');
@@ -108,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // Update ticket list table
     function updateTicketList(tickets) {
         const tbody = document.getElementById('ticketTableBody');
         tbody.innerHTML = tickets.map(ticket => `
@@ -123,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    // Attach listener for resolution form submission
     function attachResolutionFormListener(ticketId) {
         const resolutionForm = document.getElementById('resolutionForm');
         if (resolutionForm) {
@@ -132,16 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resolution = document.getElementById('resolution').value;
 
                 try {
-                    // FETCH: Send resolution update to server
                     const response = await fetch(`/api/tickets/${ticketId}/resolve`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ resolution })
                     });
+                    
                     const result = await response.json();
-                    if (response.ok) {
+                    
+                    if (response.ok && result.success) {
                         alert(result.message);
-                        fetchTicketDetails(ticketId); // Refresh ticket details
+                        fetchTicketDetails(ticketId);
                     } else {
                         alert(result.message || 'Error submitting resolution');
                     }
@@ -160,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Nav link click handling
     Object.keys(navLinks).forEach(key => {
         navLinks[key].addEventListener('click', (e) => {
             e.preventDefault();
@@ -169,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Click handling for ticket "View" links
     document.addEventListener('click', (e) => {
         if (e.target.matches('[data-ticket]')) {
             e.preventDefault();
@@ -178,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Show dashboard by default and fetch tickets
     showSection('dashboard');
-    fetchTickets(); // Initial FETCH to populate dashboard and ticket list
+    fetchTickets();
 });
