@@ -18,8 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to fetch top sales from server
     async function fetchTopSales() {
         try {
+            // Fetch request to the '/api/top-sales' endpoint to get top-selling products
             const response = await fetch('/api/top-sales');
+
+            // Check if response status is OK (status code 200-299)
             if (!response.ok) throw new Error('Failed to fetch top sales');
+
+            // Parse the response body as JSON and return it
             return await response.json();
         } catch (error) {
             console.error('Error loading top sales:', error);
@@ -30,8 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to fetch recent sales from server
     async function fetchRecentSales() {
         try {
+            // Fetch request to the '/api/recent-sales' endpoint to get recently sold products
             const response = await fetch('/api/recent-sales');
+
+            // If server responds with an error status, throw an error
             if (!response.ok) throw new Error('Failed to fetch recent sales');
+
+            // Convert the response to JSON
             return await response.json();
         } catch (error) {
             console.error('Error loading recent sales:', error);
@@ -97,9 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             try {
+                // Fetch request to update the product on server
                 const response = await fetch(`/api/products/${product.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'PUT', // PUT request for updating existing product
+                    headers: { 'Content-Type': 'application/json' }, // Sending JSON body
                     body: JSON.stringify({
                         name: newName,
                         description: newDescription,
@@ -109,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 });
 
+                // Convert response to text first (to handle non-JSON responses)
                 const rawResponse = await response.text();
                 console.log('Edit response:', rawResponse);
 
@@ -137,8 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
     async function deleteProduct(product) {
         if (confirm("Are you sure you want to delete this product?")) {
             try {
+                // Fetch request to delete product on server
                 const response = await fetch(`/api/products/${product.id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE' // DELETE request to remove the product
                 });
 
                 const rawResponse = await response.text();
@@ -171,8 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
         recentSales.innerHTML = "";
 
         try {
-            // Fetch products from the server
-            const response = await fetch('/api/seller/products');
+            // Fetch all seller products from server
+            const response = await fetch('/api/seller/products'); 
+            // GET request retrieves all products for the seller
+
             if (!response.ok) {
                 throw new Error('Failed to fetch products');
             }
@@ -214,12 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Render products for each category
                 Object.keys(productsByCategory).forEach(category => {
                     const categoryId = category.toLowerCase().replace(/\s+/g, '-');
-                    // Check for existing category section (case-insensitive)
                     let categorySection = Array.from(document.querySelectorAll('.category-section h3'))
                         .find(h3 => h3.textContent.toLowerCase() === category.toLowerCase())?.parentElement;
 
                     if (!categorySection) {
-                        // Create new category section if it doesn't exist
                         categorySection = document.createElement('div');
                         categorySection.className = 'category-section';
                         categorySection.innerHTML = `
@@ -229,7 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         sellerProducts.appendChild(categorySection);
                     }
 
-                    // Get the product list for this category
                     const categoryList = categorySection.querySelector(`#seller-product-list-${categoryId}`);
                     productsByCategory[category].forEach(product => {
                         const productCard = createProductCard(product);
@@ -239,14 +251,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Render top sales
-            const topProducts = await fetchTopSales();
+            const topProducts = await fetchTopSales(); // GET request to retrieve top-selling products
             topProducts.forEach(product => {
                 const productCard = createProductCard(product);
                 topSales.appendChild(productCard);
             });
 
             // Render recent sales
-            const recentProducts = await fetchRecentSales();
+            const recentProducts = await fetchRecentSales(); // GET request to retrieve recent sales
             recentProducts.forEach(product => {
                 const productCard = createProductCard(product);
                 recentSales.appendChild(productCard);
@@ -349,13 +361,15 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append('price', priceNum);
         formData.append('quantity', quantityNum);
 
+        // Convert compressed image DataURL to Blob using fetch
         const blob = await fetch(compressedImage).then(res => res.blob());
         formData.append('image', blob, imageFile.name);
 
         try {
+            // POST request to add a new product on server
             const response = await fetch('/addproduct', {
                 method: 'POST',
-                body: formData
+                body: formData   // FormData includes product details and image Blob
             });
 
             const result = await response.json();
