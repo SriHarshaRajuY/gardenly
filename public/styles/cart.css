@@ -26,6 +26,7 @@ h1 {
   padding: 20px;
   border-bottom: 1px solid #e6e9e0;
   transition: background-color 0.3s;
+  cursor: pointer;
 }
 
 .cart-item:hover {
@@ -112,6 +113,7 @@ h1 {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 14px;
 }
 
 .btn:hover {
@@ -191,20 +193,27 @@ h1 {
   margin-bottom: 20px;
 }
 
+.form-group {
+  margin-bottom: 15px;
+}
+
 .checkout-form label {
   display: block;
   color: #5e6d55;
   margin-bottom: 5px;
+  font-weight: bold;
 }
 
 .checkout-form input,
-.checkout-form textarea {
+.checkout-form textarea,
+.checkout-form select {
   width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   border: 1px solid #e6e9e0;
   border-radius: 5px;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 .checkout-form textarea {
@@ -233,4 +242,11 @@ h1 {
 
 .empty-cart .btn:hover {
   background-color: #1a3c34;
+}
+
+.error {
+  color: #d00000;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
 }

@@ -1,5 +1,4 @@
-// Fix typo in payment method field ID
-// - Improve error handling and validation
+
 
 let cart = [];
 
