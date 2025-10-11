@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="seller-details-btn">View Details</button>
         `;
 
-        // Attach event listeners
+        // Attach event listener for viewing product details
         productDiv.querySelector(".seller-details-btn").addEventListener("click", () => showProductDetails(product));
         
         return productDiv;
@@ -220,16 +220,50 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle form submission - Redirect to login page
-    productForm.addEventListener("submit", (e) => {
+    // Async function to handle form submission and redirect to login
+    async function handleFormSubmission(e) {
         e.preventDefault();
-        window.location.href = "/login"; // Redirect to login page
-    });
+        try {
+            // Simulating an async operation (e.g., checking login status)
+            await new Promise(resolve => setTimeout(resolve, 500)); // Mock delay
+            // Redirect to login page
+            window.location.href = "/login";
+        } catch (error) {
+            console.error("Error during form submission:", error);
+        }
+    }
+
+    // Async function to fetch initial product data (simulated)
+    async function fetchInitialProducts() {
+        try {
+            // Simulating an async fetch operation for initial product data
+            const response = await new Promise(resolve => {
+                setTimeout(() => resolve(sampleProducts), 500); // Mock API call
+            });
+            return response;
+        } catch (error) {
+            console.error("Error fetching initial products:", error);
+            return [];
+        }
+    }
+
+    // Initialize the application
+    async function init() {
+        // Fetch initial products
+        const initialProducts = await fetchInitialProducts();
+        if (initialProducts.length > 0) {
+            // Assign fetched products to sampleProducts (in this case, it's already defined)
+            console.log("Initial products loaded:", initialProducts);
+        }
+        // Render products
+        renderProducts();
+    }
 
     // Event Listeners
+    productForm.addEventListener("submit", handleFormSubmission);
     closeBtn.addEventListener("click", closeModal);
     overlay.addEventListener("click", closeModal);
 
-    // Initial render
-    renderProducts();
+    // Start initialization
+    init();
 });
