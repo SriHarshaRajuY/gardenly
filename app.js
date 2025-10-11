@@ -27,7 +27,7 @@ app.use(session({
     cookie: { secure: false } // Set to true if using HTTPS
 }));
 
-// Authentication middleware
+// Authentication middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
     if (req.session.user) return next();
     if (req.path.startsWith('/api/') || req.path === '/addproduct') {
@@ -36,6 +36,7 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login');
 };
 
+// Middleware to check if user has Admin role
 const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'Admin') return next();
     if (req.path.startsWith('/api/')) {
@@ -44,6 +45,7 @@ const isAdmin = (req, res, next) => {
     res.status(403).send('Access denied: Admin privileges required');
 };
 
+// Middleware to check if user has Seller role
 const isSeller = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'Seller') return next();
     if (req.path.startsWith('/api/') || req.path === '/addproduct') {
@@ -52,6 +54,7 @@ const isSeller = (req, res, next) => {
     res.status(403).send('Access denied: Seller privileges required');
 };
 
+// Middleware to check if user has Expert role
 const isExpert = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'Expert') return next();
     if (req.path.startsWith('/api/')) {
@@ -60,6 +63,7 @@ const isExpert = (req, res, next) => {
     res.status(403).send('Access denied: Expert privileges required');
 };
 
+// Middleware to check if user has Buyer role
 const isBuyer = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'Buyer') return next();
     if (req.path.startsWith('/api/')) {
@@ -112,6 +116,7 @@ app.post('/register', async (req, res) => {
     }
 
     try {
+        // Async: Check if user with username, email, or mobile already exists
         const existingUser = await User.findOne({
             $or: [
                 { username },
@@ -135,6 +140,7 @@ app.post('/register', async (req, res) => {
             mobile
         });
 
+        // Async: Save new user to the database
         await newUser.save();
         res.redirect('/login');
     } catch (error) {
@@ -151,6 +157,7 @@ app.post('/login', async (req, res) => {
     const { username, password, role } = req.body;
 
     try {
+        // Async: Find user by username and password
         const user = await User.findOne({ username, password });
         if (!user) {
             return res.status(401).render('login', { error: 'Invalid username or password' });
@@ -223,6 +230,7 @@ app.post('/addproduct', isAuthenticated, isSeller, upload.single('image'), async
             sold: 0
         });
 
+        // Async: Save new product to the database
         const savedProduct = await product.save();
         console.log('Product saved successfully:', savedProduct);
 
@@ -266,6 +274,7 @@ app.put('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
     }
 
     try {
+        // Async: Update product in the database
         const updatedProduct = await Product.findOneAndUpdate(
             { _id: productId, seller_id },
             { 
@@ -294,6 +303,7 @@ app.delete('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
     const seller_id = req.session.user._id;
 
     try {
+        // Async: Delete product from the database
         const result = await Product.findOneAndDelete({ _id: productId, seller_id });
         if (!result) {
             return res.status(404).json({ message: 'Product not found or not owned by seller' });
@@ -308,6 +318,7 @@ app.delete('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
 // Cart routes
 app.get('/api/cart', isAuthenticated, isBuyer, async (req, res) => {
     try {
+        // Async: Fetch cart for the authenticated user and populate product details
         const cart = await Cart.findOne({ user_id: req.session.user._id }).populate('items.product_id');
         if (!cart) {
             return res.json({ items: [] });
@@ -338,6 +349,7 @@ app.post('/api/cart/add', isAuthenticated, isBuyer, async (req, res) => {
     }
 
     try {
+        // Async: Find product by ID
         const product = await Product.findById(product_id);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -346,6 +358,7 @@ app.post('/api/cart/add', isAuthenticated, isBuyer, async (req, res) => {
             return res.status(400).json({ message: 'Insufficient product stock' });
         }
 
+        // Async: Find or create cart for the user
         let cart = await Cart.findOne({ user_id: req.session.user._id });
         if (!cart) {
             cart = new Cart({
@@ -369,6 +382,7 @@ app.post('/api/cart/add', isAuthenticated, isBuyer, async (req, res) => {
         }
 
         cart.updated_at = new Date();
+        // Async: Save updated cart
         await cart.save();
 
         res.json({ message: 'Product added to cart' });
@@ -387,6 +401,7 @@ app.put('/api/cart/update', isAuthenticated, isBuyer, async (req, res) => {
     }
 
     try {
+        // Async: Find product by ID
         const product = await Product.findById(product_id);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -395,6 +410,7 @@ app.put('/api/cart/update', isAuthenticated, isBuyer, async (req, res) => {
             return res.status(400).json({ message: 'Insufficient product stock' });
         }
 
+        // Async: Find cart for the user
         const cart = await Cart.findOne({ user_id: req.session.user._id });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
@@ -407,6 +423,7 @@ app.put('/api/cart/update', isAuthenticated, isBuyer, async (req, res) => {
 
         item.quantity = quantityNum;
         cart.updated_at = new Date();
+        // Async: Save updated cart
         await cart.save();
 
         res.json({ message: 'Cart updated' });
@@ -420,6 +437,7 @@ app.delete('/api/cart/remove/:product_id', isAuthenticated, isBuyer, async (req,
     const { product_id } = req.params;
 
     try {
+        // Async: Find cart for the user
         const cart = await Cart.findOne({ user_id: req.session.user._id });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
@@ -427,6 +445,7 @@ app.delete('/api/cart/remove/:product_id', isAuthenticated, isBuyer, async (req,
 
         cart.items = cart.items.filter(item => item.product_id.toString() !== product_id);
         cart.updated_at = new Date();
+        // Async: Save updated cart
         await cart.save();
 
         res.json({ message: 'Item removed from cart' });
@@ -438,6 +457,7 @@ app.delete('/api/cart/remove/:product_id', isAuthenticated, isBuyer, async (req,
 
 app.delete('/api/cart/clear', isAuthenticated, isBuyer, async (req, res) => {
     try {
+        // Async: Find cart for the user
         const cart = await Cart.findOne({ user_id: req.session.user._id });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
@@ -445,6 +465,7 @@ app.delete('/api/cart/clear', isAuthenticated, isBuyer, async (req, res) => {
 
         cart.items = [];
         cart.updated_at = new Date();
+        // Async: Save updated cart
         await cart.save();
 
         res.json({ message: 'Cart cleared' });
@@ -480,6 +501,7 @@ app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res
     }
 
     try {
+        // Async: Find cart for the user
         const cart = await Cart.findOne({ user_id: req.session.user._id });
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: 'Cart is empty' });
@@ -487,6 +509,7 @@ app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res
 
         // Validate items and stock
         for (const item of cart.items) {
+            // Async: Check product availability
             const product = await Product.findById(item.product_id);
             if (!product) {
                 return res.status(404).json({ success: false, message: `Product ${item.name} not found` });
@@ -513,13 +536,14 @@ app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res
 
         // Update product stock and sold
         for (const item of cart.items) {
+            // Async: Update product stock and sold count
             await Product.findByIdAndUpdate(item.product_id, {
                 $inc: { quantity: -item.quantity, sold: item.quantity },
                 sold_at: new Date()
             });
         }
 
-        // Save order and clear cart
+        // Async: Save order and clear cart
         await order.save();
         cart.items = [];
         cart.updated_at = new Date();
@@ -531,8 +555,6 @@ app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
-// ========== FIXED TICKET ROUTES (IN CORRECT ORDER) ==========
 
 // Submit ticket route
 app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (req, res) => {
@@ -551,6 +573,7 @@ app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (
 
     const expertise = expertiseMap[type.toLowerCase()];
     try {
+        // Async: Find an expert with matching expertise
         const expert = await User.findOne({ role: 'Expert', expertise });
         if (!expert) {
             return res.status(500).json({ message: 'No expert available for this type' });
@@ -572,6 +595,7 @@ app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (
             attachment: attachmentDataUrl
         });
 
+        // Async: Save new ticket to the database
         await newTicket.save();
         res.status(201).json({ message: 'Ticket submitted successfully', ticketId: newTicket._id });
     } catch (error) {
@@ -580,9 +604,10 @@ app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (
     }
 });
 
-// FIXED: User tickets route
+// User tickets route
 app.get('/api/user-tickets', isAuthenticated, async (req, res) => {
     try {
+        // Async: Fetch tickets for the authenticated user
         const tickets = await Ticket.find({ requester: req.session.user.username })
             .populate('expert_id', 'username expertise')
             .sort({ created_at: -1 });
@@ -612,10 +637,11 @@ app.get('/api/user-tickets', isAuthenticated, async (req, res) => {
     }
 });
 
-// FIXED: Expert dashboard API route
+// Expert dashboard API route
 app.get('/api/tickets', isAuthenticated, isExpert, async (req, res) => {
     try {
         const expertId = req.session.user._id;
+        // Async: Fetch tickets assigned to the expert
         const tickets = await Ticket.find({ expert_id: expertId })
             .populate('expert_id', 'username expertise')
             .sort({ created_at: -1 });
@@ -626,9 +652,10 @@ app.get('/api/tickets', isAuthenticated, isExpert, async (req, res) => {
     }
 });
 
-// FIXED: ALL tickets route for admin (MUST BE BEFORE /api/tickets/:id)
+// ALL tickets route for admin
 app.get('/api/tickets/all', isAuthenticated, isAdmin, async (req, res) => {
     try {
+        // Async: Fetch all tickets for admin
         const tickets = await Ticket.find({})
             .populate('expert_id', 'username expertise')
             .sort({ created_at: -1 });
@@ -639,14 +666,15 @@ app.get('/api/tickets/all', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// FIXED: Single ticket details route (MUST BE LAST)
+// Single ticket details route
 app.get('/api/tickets/:id', isAuthenticated, async (req, res) => {
     try {
-        // Validate if it's a valid ObjectId to prevent "all" error
+        // Validate if it's a valid ObjectId
         if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
             return res.status(400).json({ message: 'Invalid ticket ID format' });
         }
 
+        // Async: Fetch ticket by ID
         const ticket = await Ticket.findById(req.params.id)
             .populate('expert_id', 'username expertise');
         
@@ -672,7 +700,7 @@ app.get('/api/tickets/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// FIXED: Expert submit resolution route
+// Expert submit resolution route
 app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res) => {
     const { resolution } = req.body;
     const ticketId = req.params.id;
@@ -683,6 +711,7 @@ app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res)
     }
 
     try {
+        // Async: Update ticket with resolution
         const updatedTicket = await Ticket.findOneAndUpdate(
             { _id: ticketId, expert_id: expertId },
             { 
@@ -712,6 +741,7 @@ app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res)
 app.get('/expert-dashboard', isAuthenticated, isExpert, async (req, res) => {
     try {
         const expertId = req.session.user._id;
+        // Async: Fetch tickets assigned to the expert
         const tickets = await Ticket.find({ expert_id: expertId })
             .populate('expert_id', 'username expertise')
             .sort({ created_at: -1 });
@@ -725,6 +755,7 @@ app.get('/expert-dashboard', isAuthenticated, isExpert, async (req, res) => {
 // Admin API routes
 app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
+        // Async: Fetch all users
         const users = await User.find({}, 'username role email mobile');
         res.json(users);
     } catch (error) {
@@ -738,6 +769,7 @@ app.put('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     const userId = req.params.id;
 
     try {
+        // Async: Update user role
         const updatedUser = await User.findByIdAndUpdate(userId, { role }, { new: true });
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
@@ -753,6 +785,7 @@ app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     const userId = req.params.id;
 
     try {
+        // Async: Delete user
         const result = await User.findByIdAndDelete(userId);
         if (!result) {
             return res.status(404).json({ message: 'User not found' });
@@ -766,6 +799,7 @@ app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
 
 app.get('/api/products', isAuthenticated, isAdmin, async (req, res) => {
     try {
+        // Async: Fetch all products
         const products = await Product.find({}, 'name price quantity seller_id');
         res.json(products);
     } catch (error) {
@@ -779,6 +813,7 @@ app.put('/api/tickets/:id', isAuthenticated, isAdmin, async (req, res) => {
     const ticketId = req.params.id;
 
     try {
+        // Async: Update ticket status
         const updatedTicket = await Ticket.findByIdAndUpdate(ticketId, { status }, { new: true });
         if (!updatedTicket) {
             return res.status(404).json({ message: 'Ticket not found' });
@@ -792,6 +827,7 @@ app.put('/api/tickets/:id', isAuthenticated, isAdmin, async (req, res) => {
 
 app.get('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     try {
+        // Async: Fetch all orders with user information
         const orders = await Order.find({})
             .populate('user_id', 'username')
             .lean();
@@ -821,6 +857,7 @@ app.post('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     }
 
     try {
+        // Async: Find user by username
         const user = await User.findOne({ username: customer_username });
         if (!user) {
             return res.status(404).json({ message: 'Customer not found' });
@@ -829,6 +866,7 @@ app.post('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
         const productArray = product_names.split(',').map(name => name.trim());
         const items = [];
         for (const name of productArray) {
+            // Async: Find product by name
             const product = await Product.findOne({ name });
             if (!product) {
                 return res.status(404).json({ message: `Product ${name} not found` });
@@ -854,6 +892,7 @@ app.post('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
             order_id: orderId
         });
 
+        // Async: Save new order
         await order.save();
         res.status(201).json({ message: 'Order created successfully', order });
     } catch (error) {
@@ -866,6 +905,7 @@ app.delete('/api/orders/:id', isAuthenticated, isAdmin, async (req, res) => {
     const orderId = req.params.id;
 
     try {
+        // Async: Delete order by order_id
         const result = await Order.findOneAndDelete({ order_id: orderId });
         if (!result) {
             return res.status(404).json({ message: 'Order not found' });
@@ -880,6 +920,7 @@ app.delete('/api/orders/:id', isAuthenticated, isAdmin, async (req, res) => {
 // General routes
 app.get('/', async (req, res) => {
     try {
+        // Async: Fetch latest products
         const newProducts = await Product.find({})
             .sort({ created_at: -1 })
             .limit(8);
@@ -923,6 +964,7 @@ app.get('/register', (req, res) => res.render('register', { user: req.session.us
 
 app.get('/pots', async (req, res) => {
     try {
+        // Async: Fetch products in 'Pots' category
         const products = await Product.find({ category: 'Pots' });
         const formattedProducts = products.map(product => ({
             id: product._id.toString(),
@@ -949,6 +991,7 @@ app.get('/pots', async (req, res) => {
 
 app.get('/seeds', async (req, res) => {
     try {
+        // Async: Fetch products in 'Seeds' category
         const products = await Product.find({ category: 'Seeds' });
         const formattedProducts = products.map(product => ({
             id: product._id.toString(),
@@ -975,6 +1018,7 @@ app.get('/seeds', async (req, res) => {
 
 app.get('/plants', async (req, res) => {
     try {
+        // Async: Fetch products in 'Plants' category
         const plants = await Product.find({ category: 'Plants' });
         const formattedProducts = plants.map(product => ({
             id: product._id.toString(),
@@ -1004,6 +1048,7 @@ app.get('/plants', async (req, res) => {
 
 app.get('/pebbles', async (req, res) => {
     try {
+        // Async: Fetch products in 'Pebbles' category
         const products = await Product.find({ category: 'Pebbles' });
         const formattedProducts = products.map(product => ({
             id: product._id.toString(),
@@ -1030,6 +1075,7 @@ app.get('/pebbles', async (req, res) => {
 
 app.get('/tools', async (req, res) => {
     try {
+        // Async: Fetch products in 'Tools' category
         const products = await Product.find({ category: 'Tools' });
         const formattedProducts = products.map(product => ({
             id: product._id.toString(),
@@ -1056,6 +1102,7 @@ app.get('/tools', async (req, res) => {
 
 app.get('/fertilizers', async (req, res) => {
     try {
+        // Async: Fetch products in 'Fertilizers' category
         const products = await Product.find({ category: 'Fertilizers' });
         const formattedProducts = products.map(product => ({
             id: product._id.toString(),
@@ -1090,6 +1137,7 @@ app.get('/beforeseller', (req, res) => res.render('beforeseller', { user: req.se
 
 app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
     try {
+        // Async: Fetch products for the seller
         const products = await Product.find({ seller_id: req.session.user._id });
         
         const productsByCategory = products.reduce((acc, product) => {
@@ -1101,12 +1149,14 @@ app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
             return acc;
         }, {});
 
+        // Async: Fetch recent sales for the seller
         const recentSales = await Product.find({ 
             seller_id: req.session.user._id 
         })
         .sort({ created_at: -1 })
         .limit(5);
 
+        // Async: Fetch top sales for the seller
         const topSales = await Product.find({ 
             seller_id: req.session.user._id 
         })
@@ -1127,6 +1177,7 @@ app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
 
 app.get('/api/recent-sales', isAuthenticated, isSeller, async (req, res) => {
     try {
+        // Async: Fetch recent sales for the seller
         const products = await Product.find({ 
             seller_id: req.session.user._id
         })
@@ -1168,6 +1219,7 @@ app.get('/admindashboard', isAuthenticated, isAdmin, (req, res) => {
 app.get('/sellerdashboard', isSeller, async (req, res) => {
     try {
         const sellerId = req.session.user._id;
+        // Async: Fetch products for the seller
         const products = await Product.find({ seller_id: sellerId });
 
         const totalRevenue = products.reduce((sum, product) => sum + (product.price * product.sold), 0);
@@ -1190,6 +1242,7 @@ app.get('/sellerdashboard', isSeller, async (req, res) => {
                 type: 'recent'
             }));
 
+        // Async: Aggregate revenue data by month
         const revenueData = await Product.aggregate([
             { $match: { seller_id: sellerId, sold: { $gt: 0 } } },
             { $group: {
@@ -1199,6 +1252,7 @@ app.get('/sellerdashboard', isSeller, async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
+        // Async: Aggregate sales data by category
         const categoryData = await Product.aggregate([
             { $match: { seller_id: sellerId, sold: { $gt: 0 } } },
             { $group: {
@@ -1264,6 +1318,7 @@ app.get('/api/check-auth', (req, res) => {
 
 app.get('/api/seller/products', isAuthenticated, isSeller, async (req, res) => {
     try {
+        // Async: Fetch all products for the seller
         const products = await Product.find({ 
             seller_id: req.session.user._id
         });
@@ -1287,6 +1342,7 @@ app.get('/api/seller/products', isAuthenticated, isSeller, async (req, res) => {
 
 app.get('/api/top-sales', isAuthenticated, isSeller, async (req, res) => {
     try {
+        // Async: Fetch top sales for the seller
         const products = await Product.find({ 
             seller_id: req.session.user._id
         })
@@ -1318,6 +1374,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 7000;
+// Async: Initialize database and start server
 initializeDatabase()
     .then(() => {
         app.listen(PORT, () => {
