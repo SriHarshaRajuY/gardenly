@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic meta tags for character encoding and responsiveness -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Page title -->
     <title>Support Portal</title>
+
+    <!-- Linking external CSS stylesheet -->
     <link rel="stylesheet" href="../public/styles/expert_support.css">
 </head>
+
 <body>
+    <!-- Navigation bar section -->
     <nav>
         <div class="logo">
+            <!-- Logo text with two different styles -->
             <span class="nursery">Expert</span><span class="live">Support</span>
         </div>
+
+        <!-- Navigation links -->
         <div class="nav-links">
             <a href="/" id="homeLink">Home</a>
             <a href="/expert_support" class="active" id="supportLink">Support</a>
@@ -23,29 +33,41 @@
         </div>
     </nav>
 
+    <!-- Main content area -->
     <main>
+        <!-- Home Section -->
         <div id="homeSection" class="section active">
             <h1>Hi, how can we help you?</h1>
+
+            <!-- Search bar -->
             <div class="search-container">
                 <input type="text" placeholder="Enter the search term here....">
                 <button class="search-btn">🔍</button>
             </div>
+
+            <!-- Quick navigation cards -->
             <div class="cards">
+                <!-- Browse articles card -->
                 <!-- added cards -->
                 <div class="card" id="browseArticlesCard">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGMxODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiAzaDZhNCA0IDAgMCAxIDQgNHYxNGEzIDMgMCAwIDAtMyAzSDJWM3oiPjwvcGF0aD48cGF0aCBkPSJNMjIgM2gtNmE0IDQgMCAwIDAtNCA0djE0YTMgMyAwIDAgMSAzIDhoN1YzeiI+PC9wYXRoPjwvc3ZnPg==" alt="Browse articles">
+                    <img src="data:image/svg+xml;base64,..." alt="Browse articles">
                     <h3>Browse articles</h3>
                     <p>Explore How-To's and learn best practices from our knowledge base</p>
                 </div>
+
+                <!-- Submit ticket card -->
                 <div class="card" id="submitTicketCard">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGMxODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTVhMiAyIDAgMCAxLTIgMmgtMWE2IDYgMCAwIDEtNi02di0zYTIgMiAwIDAgMSAyLTJoM2EyIDIgMCAwIDEgMiAydjFhMiAyIDAgMCA1LTIgMmgtMyI+PC9wYXRoPjxwYXRoIGQ9Ik0zIDNoMTh2N0gzeiI+PC9wYXRoPjwvc3ZnPg==" alt="Submit ticket">
+                    <img src="data:image/svg+xml;base64,..." alt="Submit ticket">
                     <h3>Submit a ticket</h3>
                     <p>Describe your issue by filling out the support ticket form</p>
                 </div>
             </div>
+
+            <!-- Popular articles section -->
             <div class="popular-articles">
                 <h2>Most popular articles</h2>
                 <div class="articles-grid">
+                    <!-- Article links -->
                     <div class="article-item">
                         <a href="#" data-article="order-status">Order Status</a>
                         <p class="modified-date">Modified on Fri, 10 Jun, 2022 at 4:13 PM</p>
@@ -63,13 +85,16 @@
                         <p class="modified-date">Modified on Fri, 10 Jun, 2022 at 4:38 PM</p>
                     </div>
                 </div>
+                <!-- Link to view all articles -->
                 <a href="#" class="view-all" data-list="quick-help">View all articles</a>
             </div>
         </div>
 
+        <!-- Knowledge Base Section -->
         <div id="knowledgeBaseSection" class="section">
             <h1>Knowledge base</h1>
             <div class="kb-container">
+                <!-- Category: General -->
                 <div class="kb-category">
                     <h2>General (1)</h2>
                     <div class="kb-subcategory">
@@ -82,6 +107,8 @@
                         <a href="#" class="view-all" data-list="quick-help">View all 9</a>
                     </div>
                 </div>
+
+                <!-- Category: Payment Gateway -->
                 <div class="kb-category">
                     <h2>Payment Gateway (1)</h2>
                     <div class="kb-subcategory">
@@ -97,9 +124,12 @@
             </div>
         </div>
 
+        <!-- Single Article Display Section -->
         <div id="articleSection" class="section">
             <div class="breadcrumb"></div>
             <div class="article-content"></div>
+
+            <!-- Article feedback buttons -->
             <div class="article-feedback">
                 <p>Was this article helpful?</p>
                 <button class="feedback-btn" data-value="no">No</button>
@@ -107,22 +137,29 @@
             </div>
         </div>
 
+        <!-- Article List Section -->
         <div id="articleListSection" class="section">
             <div class="breadcrumb"></div>
             <div class="article-list"></div>
         </div>
 
+        <!-- Ticket Submission Form Section -->
         <div id="ticketSection" class="section">
             <h1>Submit a ticket</h1>
             <form id="ticketForm" class="ticket-form">
+                <!-- Requester Info -->
                 <div class="form-group">
                     <label for="requester">Requester *</label>
                     <input type="text" id="requester" value="<%= user ? user.username : '' %>" required>
                 </div>
+
+                <!-- Subject Field -->
                 <div class="form-group">
                     <label for="subject">Subject *</label>
                     <input type="text" id="subject" required>
                 </div>
+
+                <!-- Type Selection -->
                 <div class="form-group">
                     <label for="type">Type</label>
                     <select id="type" required>
@@ -132,14 +169,20 @@
                         <option value="billing">Billing</option>
                     </select>
                 </div>
+
+                <!-- Description Box -->
                 <div class="form-group">
                     <label for="description">Description</label>
                     <textarea id="description" required></textarea>
                 </div>
+
+                <!-- File Upload -->
                 <div class="form-group">
                     <label for="attachment">Attachment</label>
                     <input type="file" id="attachment" accept="image/*">
                 </div>
+
+                <!-- Form Buttons -->
                 <div class="form-actions">
                     <button type="button" class="cancel-btn">Cancel</button>
                     <button type="submit" class="submit-btn">Submit</button>
@@ -147,8 +190,11 @@
             </form>
         </div>
 
+        <!-- Messages Section -->
         <div id="messagesSection" class="section">
             <h1>Your Messages</h1>
+
+            <!-- Table showing user tickets -->
             <div class="ticket-list">
                 <table>
                     <thead>
@@ -162,12 +208,14 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="userTickets`userTicketsTableBody">
+                    <tbody id="userTicketsTableBody">
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
+
+    <!-- External JavaScript file -->
     <script src="../public/scripts/expert_support.js"></script>
 </body>
 </html>

@@ -21,19 +21,24 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchTickets() {
         try {
             const response = await fetch('/api/tickets');
+            if (!response.ok) throw new Error('Failed to fetch tickets');
+            
             const tickets = await response.json();
             updateDashboard(tickets);
             updateTicketList(tickets);
         } catch (error) {
             console.error('Error fetching tickets:', error);
+            alert('Error fetching tickets');
         }
     }
 
     async function fetchTicketDetails(ticketId) {
         try {
-            const response = await fetch('/api/tickets');
-            const tickets = await response.json();
-            const ticket = tickets.find(t => t._id === ticketId);
+            const response = await fetch(`/api/tickets/${ticketId}`);
+            if (!response.ok) throw new Error('Failed to fetch ticket details');
+            
+            const ticket = await response.json();
+
             if (ticket) {
                 document.getElementById('ticketId').textContent = ticket._id;
                 document.getElementById('ticketRequester').textContent = ticket.requester;
@@ -53,7 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const resolutionFormContainer = document.getElementById('resolutionFormContainer');
                 if (ticket.status === 'Resolved') {
-                    resolutionFormContainer.innerHTML = `<p><strong>Resolution:</strong> ${ticket.resolution}</p>`;
+                    resolutionFormContainer.innerHTML = `
+                        <h2>Resolution</h2>
+                        <div class="resolution-display">
+                            <p><strong>Resolution Provided:</strong></p>
+                            <p>${ticket.resolution}</p>
+                            <p><strong>Resolved at:</strong> ${new Date(ticket.resolved_at).toLocaleString()}</p>
+                        </div>
+                        <button type="button" class="cancel-btn" onclick="showSection('tickets')">Back to Tickets</button>
+                    `;
                 } else {
                     resolutionFormContainer.innerHTML = `
                         <h2>Provide Resolution</h2>
@@ -64,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div class="form-actions">
                                 <button type="button" class="cancel-btn" id="cancelResolution">Cancel</button>
-                                <button type="submit" class="submit-btn">Send</button>
+                                <button type="submit" class="submit-btn">Send Resolution</button>
                             </div>
                         </form>
                     `;
@@ -84,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('activeTickets').textContent = activeTickets;
 
         const today = new Date().toISOString().split('T')[0];
-        const resolvedToday = tickets.filter(t => t.status === 'Resolved' && new Date(t.created_at).toISOString().split('T')[0] === today).length;
+        const resolvedToday = tickets.filter(t => 
+            t.status === 'Resolved' && 
+            t.resolved_at && 
+            new Date(t.resolved_at).toISOString().split('T')[0] === today
+        ).length;
         document.getElementById('resolvedToday').textContent = resolvedToday;
 
         const recentTicketsBody = document.getElementById('recentTicketsBody');
@@ -126,10 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ resolution })
                     });
+                    
                     const result = await response.json();
-                    if (response.ok) {
+                    
+                    if (response.ok && result.success) {
                         alert(result.message);
-                        fetchTicketDetails(ticketId); // Refresh ticket details
+                        fetchTicketDetails(ticketId);
                     } else {
                         alert(result.message || 'Error submitting resolution');
                     }

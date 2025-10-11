@@ -7,7 +7,6 @@ const multer = require('multer');
 const app = express();
 require('dotenv').config();
 
-
 // Configure multer for file uploads
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -70,7 +69,6 @@ const isBuyer = (req, res, next) => {
 };
 
 // Registration route
-// POST /register - Handles user registration with validation for username, password, role, email, and mobile
 app.post('/register', async (req, res) => {
     const { username, password, role, email, mobile } = req.body;
 
@@ -149,7 +147,6 @@ app.post('/register', async (req, res) => {
 });
 
 // Login route
-// POST /login - Handles user login with username, password, and role verification
 app.post('/login', async (req, res) => {
     const { username, password, role } = req.body;
 
@@ -186,7 +183,6 @@ app.post('/login', async (req, res) => {
 });
 
 // Product routes
-// POST /addproduct - Allows authenticated sellers to add a new product with image upload and validation
 app.post('/addproduct', isAuthenticated, isSeller, upload.single('image'), async (req, res) => {
     try {
         console.log('Received addproduct request:', req.body);
@@ -251,7 +247,6 @@ app.post('/addproduct', isAuthenticated, isSeller, upload.single('image'), async
     }
 });
 
-// PUT /api/products/:id - Allows authenticated sellers to update a specific product they own
 app.put('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
     const { name, description, category, price, quantity } = req.body;
     const productId = req.params.id;
@@ -294,7 +289,6 @@ app.put('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
     }
 });
 
-// DELETE /api/products/:id - Allows authenticated sellers to delete a specific product they own
 app.delete('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
     const productId = req.params.id;
     const seller_id = req.session.user._id;
@@ -312,7 +306,6 @@ app.delete('/api/products/:id', isAuthenticated, isSeller, async (req, res) => {
 });
 
 // Cart routes
-// GET /api/cart - Retrieves the authenticated buyer's cart items
 app.get('/api/cart', isAuthenticated, isBuyer, async (req, res) => {
     try {
         const cart = await Cart.findOne({ user_id: req.session.user._id }).populate('items.product_id');
@@ -336,7 +329,6 @@ app.get('/api/cart', isAuthenticated, isBuyer, async (req, res) => {
     }
 });
 
-// POST /api/cart/add - Adds a product to the authenticated buyer's cart with stock check
 app.post('/api/cart/add', isAuthenticated, isBuyer, async (req, res) => {
     const { product_id, quantity } = req.body;
     const quantityNum = parseInt(quantity) || 1;
@@ -386,7 +378,6 @@ app.post('/api/cart/add', isAuthenticated, isBuyer, async (req, res) => {
     }
 });
 
-// PUT /api/cart/update - Updates the quantity of a product in the authenticated buyer's cart
 app.put('/api/cart/update', isAuthenticated, isBuyer, async (req, res) => {
     const { product_id, quantity } = req.body;
     const quantityNum = parseInt(quantity);
@@ -425,7 +416,6 @@ app.put('/api/cart/update', isAuthenticated, isBuyer, async (req, res) => {
     }
 });
 
-// DELETE /api/cart/remove/:product_id - Removes a specific product from the authenticated buyer's cart
 app.delete('/api/cart/remove/:product_id', isAuthenticated, isBuyer, async (req, res) => {
     const { product_id } = req.params;
 
@@ -446,7 +436,6 @@ app.delete('/api/cart/remove/:product_id', isAuthenticated, isBuyer, async (req,
     }
 });
 
-// DELETE /api/cart/clear - Clears all items from the authenticated buyer's cart
 app.delete('/api/cart/clear', isAuthenticated, isBuyer, async (req, res) => {
     try {
         const cart = await Cart.findOne({ user_id: req.session.user._id });
@@ -466,7 +455,6 @@ app.delete('/api/cart/clear', isAuthenticated, isBuyer, async (req, res) => {
 });
 
 // Order route
-// POST /api/delivery/create-order - Creates a new order from the buyer's cart with validation and stock updates
 app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res) => {
     const { customer_name, address, phone_number, email, payment_method, comments, items } = req.body;
 
@@ -544,8 +532,9 @@ app.post('/api/delivery/create-order', isAuthenticated, isBuyer, async (req, res
     }
 });
 
-// Ticket routes
-// POST /submit-ticket - Submits a support ticket with optional attachment and assigns to an expert
+// ========== FIXED TICKET ROUTES (IN CORRECT ORDER) ==========
+
+// Submit ticket route
 app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (req, res) => {
     const { requester, subject, type, description } = req.body;
     const attachmentFile = req.file;
@@ -591,8 +580,99 @@ app.post('/submit-ticket', isAuthenticated, upload.single('attachment'), async (
     }
 });
 
-// Expert submit resolution route
-// POST /api/tickets/:id/resolve - Allows authenticated experts to resolve a specific ticket assigned to them
+// FIXED: User tickets route
+app.get('/api/user-tickets', isAuthenticated, async (req, res) => {
+    try {
+        const tickets = await Ticket.find({ requester: req.session.user.username })
+            .populate('expert_id', 'username expertise')
+            .sort({ created_at: -1 });
+
+        const formattedTickets = tickets.map(ticket => ({
+            _id: ticket._id,
+            requester: ticket.requester,
+            subject: ticket.subject,
+            type: ticket.type,
+            description: ticket.description,
+            status: ticket.status,
+            expert_id: ticket.expert_id ? {
+                _id: ticket.expert_id._id,
+                username: ticket.expert_id.username,
+                expertise: ticket.expert_id.expertise
+            } : null,
+            created_at: ticket.created_at,
+            attachment: ticket.attachment,
+            resolution: ticket.resolution,
+            resolved_at: ticket.resolved_at
+        }));
+
+        res.json(formattedTickets);
+    } catch (error) {
+        console.error('Error fetching user tickets:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// FIXED: Expert dashboard API route
+app.get('/api/tickets', isAuthenticated, isExpert, async (req, res) => {
+    try {
+        const expertId = req.session.user._id;
+        const tickets = await Ticket.find({ expert_id: expertId })
+            .populate('expert_id', 'username expertise')
+            .sort({ created_at: -1 });
+        res.json(tickets || []);
+    } catch (error) {
+        console.error('API: Error fetching tickets:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// FIXED: ALL tickets route for admin (MUST BE BEFORE /api/tickets/:id)
+app.get('/api/tickets/all', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const tickets = await Ticket.find({})
+            .populate('expert_id', 'username expertise')
+            .sort({ created_at: -1 });
+        res.json(tickets);
+    } catch (error) {
+        console.error('Error fetching all tickets:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// FIXED: Single ticket details route (MUST BE LAST)
+app.get('/api/tickets/:id', isAuthenticated, async (req, res) => {
+    try {
+        // Validate if it's a valid ObjectId to prevent "all" error
+        if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+            return res.status(400).json({ message: 'Invalid ticket ID format' });
+        }
+
+        const ticket = await Ticket.findById(req.params.id)
+            .populate('expert_id', 'username expertise');
+        
+        if (!ticket) {
+            return res.status(404).json({ message: 'Ticket not found' });
+        }
+
+        // Check if user has permission to view this ticket
+        if (req.session.user.role !== 'Admin' && 
+            req.session.user.role !== 'Expert' && 
+            ticket.requester !== req.session.user.username) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        res.json(ticket);
+    } catch (error) {
+        console.error('Error fetching ticket:', error);
+        // Handle invalid ObjectId errors
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid ticket ID format' });
+        }
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// FIXED: Expert submit resolution route
 app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res) => {
     const { resolution } = req.body;
     const ticketId = req.params.id;
@@ -605,7 +685,11 @@ app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res)
     try {
         const updatedTicket = await Ticket.findOneAndUpdate(
             { _id: ticketId, expert_id: expertId },
-            { resolution, status: 'Resolved' },
+            { 
+                resolution, 
+                status: 'Resolved',
+                resolved_at: new Date()
+            },
             { new: true }
         );
 
@@ -613,32 +697,24 @@ app.post('/api/tickets/:id/resolve', isAuthenticated, isExpert, async (req, res)
             return res.status(404).json({ message: 'Ticket not found or not assigned to this expert' });
         }
 
-        res.json({ message: 'Resolution submitted successfully' });
+        res.json({ 
+            success: true,
+            message: 'Resolution submitted successfully',
+            ticket: updatedTicket 
+        });
     } catch (error) {
         console.error('Error submitting resolution:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// User tickets route
-// GET /api/user-tickets - Retrieves all tickets submitted by the authenticated user
-app.get('/api/user-tickets', isAuthenticated, async (req, res) => {
-    try {
-        const tickets = await Ticket.find({ requester: req.session.user.username })
-            .populate('expert_id', 'username');
-        res.json(tickets);
-    } catch (error) {
-        console.error('Error fetching user tickets:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Expert dashboard and API routes
-// GET /expert-dashboard - Renders the expert dashboard with assigned tickets for authenticated experts
+// Expert dashboard route
 app.get('/expert-dashboard', isAuthenticated, isExpert, async (req, res) => {
     try {
         const expertId = req.session.user._id;
-        const tickets = await Ticket.find({ expert_id: expertId });
+        const tickets = await Ticket.find({ expert_id: expertId })
+            .populate('expert_id', 'username expertise')
+            .sort({ created_at: -1 });
         res.render('expert_dashboard', { user: req.session.user, tickets: tickets || [] });
     } catch (error) {
         console.error('Error fetching tickets:', error);
@@ -646,20 +722,7 @@ app.get('/expert-dashboard', isAuthenticated, isExpert, async (req, res) => {
     }
 });
 
-// GET /api/tickets - API endpoint to fetch tickets assigned to the authenticated expert
-app.get('/api/tickets', isAuthenticated, isExpert, async (req, res) => {
-    try {
-        const expertId = req.session.user._id;
-        const tickets = await Ticket.find({ expert_id: expertId });
-        res.json(tickets || []);
-    } catch (error) {
-        console.error('API: Error fetching tickets:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
 // Admin API routes
-// GET /api/users - Retrieves all users' details (username, role, email, mobile) for authenticated admins
 app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const users = await User.find({}, 'username role email mobile');
@@ -670,7 +733,6 @@ app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// PUT /api/users/:id - Allows authenticated admins to update a user's role
 app.put('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     const { role } = req.body;
     const userId = req.params.id;
@@ -687,7 +749,6 @@ app.put('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// DELETE /api/users/:id - Allows authenticated admins to delete a specific user
 app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     const userId = req.params.id;
 
@@ -703,7 +764,6 @@ app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// GET /api/products - Retrieves all products' details (name, price, quantity, seller_id) for authenticated admins
 app.get('/api/products', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const products = await Product.find({}, 'name price quantity seller_id');
@@ -714,18 +774,6 @@ app.get('/api/products', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// GET /api/tickets/all - Retrieves all tickets for authenticated admins
-app.get('/api/tickets/all', isAuthenticated, isAdmin, async (req, res) => {
-    try {
-        const tickets = await Ticket.find({});
-        res.json(tickets);
-    } catch (error) {
-        console.error('Error fetching tickets:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// PUT /api/tickets/:id - Allows authenticated admins to update the status of a specific ticket
 app.put('/api/tickets/:id', isAuthenticated, isAdmin, async (req, res) => {
     const { status } = req.body;
     const ticketId = req.params.id;
@@ -742,7 +790,6 @@ app.put('/api/tickets/:id', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// GET /api/orders - Retrieves all orders with populated user details for authenticated admins
 app.get('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const orders = await Order.find({})
@@ -761,7 +808,6 @@ app.get('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// POST /api/orders - Allows authenticated admins to create a new order for a customer
 app.post('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     const { customer_username, product_names, amount } = req.body;
 
@@ -816,7 +862,6 @@ app.post('/api/orders', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// DELETE /api/orders/:id - Allows authenticated admins to delete a specific order by order ID
 app.delete('/api/orders/:id', isAuthenticated, isAdmin, async (req, res) => {
     const orderId = req.params.id;
 
@@ -833,28 +878,25 @@ app.delete('/api/orders/:id', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // General routes
-// GET / - Renders the homepage with latest products and static best products
 app.get('/', async (req, res) => {
     try {
-        // Fetch the latest 8 products, including those with category 'Plants'
         const newProducts = await Product.find({})
-            .sort({ created_at: -1 }) // Sort by creation date (newest first)
+            .sort({ created_at: -1 })
             .limit(8);
 
         const formattedNewProducts = newProducts.map((product) => ({
             id: product._id.toString(),
             name: product.name,
             image: product.image,
-            rating: 4.5, // Static rating as per original code
+            rating: 4.5,
             price: product.price,
-            originalPrice: product.price * 1.45, // As per original code
+            originalPrice: product.price * 1.45,
             description: product.description || 'No description available',
             inStock: product.quantity > 0,
             available: product.quantity,
-            category: product.category // Include category for use in client-side logic
+            category: product.category
         }));
 
-        // Static best products as per original code
         const bestProducts = [
             { id: 1, name: "Bonsai", image: "/public/images/best-products/s1.jpg" },
             { id: 2, name: "Indoor", image: "/public/images/best-products/s2.jpg" },
@@ -877,10 +919,8 @@ app.get('/', async (req, res) => {
     }
 });
 
-// GET /register - Renders the registration page
 app.get('/register', (req, res) => res.render('register', { user: req.session.user || null, error: null }));
 
-// GET /pots - Renders the pots category page with products from the 'Pots' category
 app.get('/pots', async (req, res) => {
     try {
         const products = await Product.find({ category: 'Pots' });
@@ -892,7 +932,7 @@ app.get('/pots', async (req, res) => {
             price: product.price,
             description: product.description,
             inStock: product.quantity > 0,
-            material: 'Plastic' // Default material
+            material: 'Plastic'
         }));
         res.render('pots', { 
             user: req.session.user || null,
@@ -907,7 +947,6 @@ app.get('/pots', async (req, res) => {
     }
 });
 
-// GET /seeds - Renders the seeds category page with products from the 'Seeds' category
 app.get('/seeds', async (req, res) => {
     try {
         const products = await Product.find({ category: 'Seeds' });
@@ -919,7 +958,7 @@ app.get('/seeds', async (req, res) => {
             price: product.price,
             description: product.description,
             inStock: product.quantity > 0,
-            material: 'Plastic' // Default material
+            material: 'Plastic'
         }));
         res.render('seeds', { 
             user: req.session.user || null,
@@ -934,10 +973,8 @@ app.get('/seeds', async (req, res) => {
     }
 });
 
-// GET /plants - Renders the plants category page with products from the 'Plants' category
 app.get('/plants', async (req, res) => {
     try {
-        // Fetch all products with category 'Plants'
         const plants = await Product.find({ category: 'Plants' });
         const formattedProducts = plants.map(product => ({
             id: product._id.toString(),
@@ -949,7 +986,7 @@ app.get('/plants', async (req, res) => {
             description: product.description || 'No description available',
             inStock: product.quantity > 0,
             available: product.quantity,
-            material: 'Plastic', // Default material
+            material: 'Plastic',
             category: product.category
         }));
         res.render('plants', { 
@@ -965,7 +1002,6 @@ app.get('/plants', async (req, res) => {
     }
 });
 
-// GET /pebbles - Renders the pebbles category page with products from the 'Pebbles' category
 app.get('/pebbles', async (req, res) => {
     try {
         const products = await Product.find({ category: 'Pebbles' });
@@ -977,7 +1013,7 @@ app.get('/pebbles', async (req, res) => {
             price: product.price,
             description: product.description,
             inStock: product.quantity > 0,
-            material: 'Plastic' // Default material
+            material: 'Plastic'
         }));
         res.render('pebbles', { 
             user: req.session.user || null,
@@ -992,7 +1028,6 @@ app.get('/pebbles', async (req, res) => {
     }
 });
 
-// GET /tools - Renders the tools category page with products from the 'Tools' category
 app.get('/tools', async (req, res) => {
     try {
         const products = await Product.find({ category: 'Tools' });
@@ -1004,7 +1039,7 @@ app.get('/tools', async (req, res) => {
             price: product.price,
             description: product.description,
             inStock: product.quantity > 0,
-            material: 'Plastic' // Default material
+            material: 'Plastic'
         }));
         res.render('tools', { 
             user: req.session.user || null,
@@ -1019,7 +1054,6 @@ app.get('/tools', async (req, res) => {
     }
 });
 
-// GET /fertilizers - Renders the fertilizers category page with products from the 'Fertilizers' category
 app.get('/fertilizers', async (req, res) => {
     try {
         const products = await Product.find({ category: 'Fertilizers' });
@@ -1031,7 +1065,7 @@ app.get('/fertilizers', async (req, res) => {
             price: product.price,
             description: product.description,
             inStock: product.quantity > 0,
-            material: 'Plastic' // Default material
+            material: 'Plastic'
         }));
         res.render('fertilizers', { 
             user: req.session.user || null,
@@ -1046,25 +1080,18 @@ app.get('/fertilizers', async (req, res) => {
     }
 });
 
-// GET /login - Renders the login page
 app.get('/login', (req, res) => res.render('login', { error: null }));
 
-// GET /expert_support - Renders the expert support page
 app.get('/expert_support', (req, res) => res.render('expert_support', { user: req.session.user || null }));
 
-// GET /cart - Renders the cart page for authenticated buyers
 app.get('/cart', isAuthenticated, isBuyer, (req, res) => res.render('cart', { user: req.session.user || null }));
 
-// GET /beforeseller - Renders the before seller page
 app.get('/beforeseller', (req, res) => res.render('beforeseller', { user: req.session.user || null }));
 
-// GET /seller - Renders the seller dashboard with products grouped by category, recent sales, and top sales for authenticated sellers
 app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
     try {
-        // Fetch only the seller's products from the database
         const products = await Product.find({ seller_id: req.session.user._id });
         
-        // Group products by category
         const productsByCategory = products.reduce((acc, product) => {
             const category = product.category || 'Uncategorized';
             if (!acc[category]) {
@@ -1074,14 +1101,12 @@ app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
             return acc;
         }, {});
 
-        // Fetch recent sales (last 5 products by creation date)
         const recentSales = await Product.find({ 
             seller_id: req.session.user._id 
         })
         .sort({ created_at: -1 })
         .limit(5);
 
-        // Fetch top sales (top 5 by sold quantity)
         const topSales = await Product.find({ 
             seller_id: req.session.user._id 
         })
@@ -1100,7 +1125,6 @@ app.get('/seller', isAuthenticated, isSeller, async (req, res) => {
     }
 });
 
-// GET /api/recent-sales - API endpoint to fetch recent sales (last 5 products) for authenticated sellers
 app.get('/api/recent-sales', isAuthenticated, isSeller, async (req, res) => {
     try {
         const products = await Product.find({ 
@@ -1127,38 +1151,20 @@ app.get('/api/recent-sales', isAuthenticated, isSeller, async (req, res) => {
 });
 
 // Blog routes
-// GET /article1 - Renders the first blog article page
 app.get('/article1', (req, res) => res.render('blogs/article1', { user: req.session.user || null }));
-
-// GET /article2 - Renders the second blog article page
 app.get('/article2', (req, res) => res.render('blogs/article2', { user: req.session.user || null }));
-
-// GET /article3 - Renders the third blog article page
 app.get('/article3', (req, res) => res.render('blogs/article3', { user: req.session.user || null }));
-
-// GET /article4 - Renders the fourth blog article page
 app.get('/article4', (req, res) => res.render('blogs/article4', { user: req.session.user || null }));
-
-// GET /basics - Renders the basics blog page
 app.get('/basics', (req, res) => res.render('blogs/basics', { user: req.session.user || null }));
-
-// GET /blog - Renders the main blog page
 app.get('/blog', (req, res) => res.render('blogs/blog', { user: req.session.user || null }));
-
-// GET /kitchen - Renders the kitchen blog page
 app.get('/kitchen', (req, res) => res.render('blogs/kitchen', { user: req.session.user || null }));
-
-// GET /maintenance - Renders the maintenance blog page
 app.get('/maintenance', (req, res) => res.render('blogs/maintenance', { user: req.session.user || null }));
 
 // Protected dashboard routes
-// GET /admindashboard - Renders the admin dashboard for authenticated admins
 app.get('/admindashboard', isAuthenticated, isAdmin, (req, res) => {
     res.render('admindashboard', { user: req.session.user || null });
 });
 
-// Seller Dashboard route
-// GET /sellerdashboard - Renders the detailed seller dashboard with metrics, charts, and top sales
 app.get('/sellerdashboard', isSeller, async (req, res) => {
     try {
         const sellerId = req.session.user._id;
@@ -1221,7 +1227,6 @@ app.get('/sellerdashboard', isSeller, async (req, res) => {
     }
 });
 
-// GET /deliverymanagerdashboard - Renders the delivery manager dashboard with static metrics and data
 app.get('/deliverymanagerdashboard', (req, res) => {
     const data = {
         currentPage: 'dashboard',
@@ -1236,7 +1241,6 @@ app.get('/deliverymanagerdashboard', (req, res) => {
     res.render('dashboard', { ...data, user: req.session.user || null });
 });
 
-// GET /deliverymanager - Renders the delivery manager page for authenticated delivery managers
 app.get('/deliverymanager', isAuthenticated, (req, res) => {
     if (req.session.user.role !== 'Delivery Manager') {
         return res.status(403).send('Access denied: Only Delivery Managers can access this page');
@@ -1244,8 +1248,6 @@ app.get('/deliverymanager', isAuthenticated, (req, res) => {
     res.render('deliverymanager', { user: req.session.user || null });
 });
 
-// Logout route
-// GET /logout - Destroys the user session and redirects to login
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -1256,20 +1258,10 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Authentication check route
-// GET /api/check-auth - Checks if the user is authenticated and returns boolean
 app.get('/api/check-auth', (req, res) => {
     res.json({ isAuthenticated: !!req.session.user });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Server error:', err.stack);
-    res.status(500).json({ message: 'Something went wrong!', error: err.message });
-});
-
-// Seller products API endpoint
-// GET /api/seller/products - API endpoint to fetch all products for the authenticated seller
 app.get('/api/seller/products', isAuthenticated, isSeller, async (req, res) => {
     try {
         const products = await Product.find({ 
@@ -1293,8 +1285,6 @@ app.get('/api/seller/products', isAuthenticated, isSeller, async (req, res) => {
     }
 });
 
-// Top sales API endpoint
-// GET /api/top-sales - API endpoint to fetch top 5 sales by sold quantity for authenticated sellers
 app.get('/api/top-sales', isAuthenticated, isSeller, async (req, res) => {
     try {
         const products = await Product.find({ 
@@ -1318,6 +1308,12 @@ app.get('/api/top-sales', isAuthenticated, isSeller, async (req, res) => {
         console.error('Error fetching top sales:', error);
         res.status(500).json({ error: 'Server error' });
     }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server error:', err.stack);
+    res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
 // Start server

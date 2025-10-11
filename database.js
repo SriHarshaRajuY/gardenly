@@ -1,25 +1,24 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-require('dotenv').config(); // Load environment variables
-
 mongoose.connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 30000, // 30 seconds timeout
-    bufferCommands: false // Disable command buffering
+    serverSelectionTimeoutMS: 30000,
+    bufferCommands: false
 })
 .then(() => {
     console.log('Successfully connected to MongoDB');
 })
 .catch(err => {
     console.error('MongoDB connection error:', err.message);
-    process.exit(1); // Exit if we can't connect to the database
+    process.exit(1);
 });
+
 // User Schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, required: true },
-    expertise: { type: String },
+    expertise: { type: String, default: 'General' }, // FIXED: Added default value
     email: { type: String, required: true, unique: true },
     mobile: { type: String, required: true, unique: true }
 });
@@ -38,7 +37,7 @@ const productSchema = new mongoose.Schema({
     sold_at: { type: Date }
 });
 
-// Ticket Schema
+// Ticket Schema - FIXED: Added resolved_at field
 const ticketSchema = new mongoose.Schema({
     requester: { type: String, required: true },
     subject: { type: String, required: true },
@@ -47,8 +46,9 @@ const ticketSchema = new mongoose.Schema({
     status: { type: String, default: 'Open' },
     expert_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     created_at: { type: Date, default: Date.now },
-    attachment: { type: String }, // Store base64-encoded image
-    resolution: { type: String }  // Store expert's resolution
+    attachment: { type: String },
+    resolution: { type: String },
+    resolved_at: { type: Date } // FIXED: Added resolution timestamp
 });
 
 // Order Schema
@@ -107,7 +107,7 @@ const defaultUsers = [
     { username: 'expert3', password: 'expert789', role: 'Expert', expertise: 'Billing', email: 'expert3@example.com', mobile: '2345098761' }
 ];
 
-// Default products data
+// Default products data - COMPLETE LIST
 const defaultProducts = [
     { 
         name: 'Peace Lily, Spathiphyllum - Plant', 
