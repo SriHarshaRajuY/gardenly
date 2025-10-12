@@ -1,25 +1,31 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables from .env file
 
-// Connect to MongoDB with better error handling and increased timeout
+// =======================
+// MongoDB Connection
+// =======================
 mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
-    serverSelectionTimeoutMS: 30000, // 30 seconds timeout
-    bufferCommands: false // Disable command buffering
+    serverSelectionTimeoutMS: 30000, // 30 seconds timeout for server selection
+    bufferCommands: false // Disable command buffering to avoid queuing commands if DB is down
 })
 .then(() => {
     console.log('Successfully connected to MongoDB');
 })
 .catch(err => {
     console.error('MongoDB connection error:', err.message);
-    process.exit(1); // Exit if we can't connect to the database
+    process.exit(1); // Exit if connection fails
 });
+
+// =======================
+// Schemas
+// =======================
 
 // User Schema
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true, unique: true }, // unique username
     password: { type: String, required: true },
-    role: { type: String, required: true },
-    expertise: { type: String },
+    role: { type: String, required: true }, // Role: Admin, Seller, Buyer, Expert, etc.
+    expertise: { type: String }, // For experts only
     email: { type: String, required: true, unique: true },
     mobile: { type: String, required: true, unique: true }
 });
@@ -31,29 +37,29 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     category: { type: String, default: 'General' },
     image: { type: String },
-    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Reference to seller
     quantity: { type: Number, default: 0 },
     sold: { type: Number, default: 0 },
     created_at: { type: Date, default: Date.now },
-    sold_at: { type: Date }
+    sold_at: { type: Date } // Optional date for last sold
 });
 
 // Ticket Schema
 const ticketSchema = new mongoose.Schema({
     requester: { type: String, required: true },
     subject: { type: String, required: true },
-    type: { type: String, required: true },
+    type: { type: String, required: true }, // Issue type: General, Technical, Billing
     description: { type: String, required: true },
-    status: { type: String, default: 'Open' },
-    expert_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    status: { type: String, default: 'Open' }, // Ticket status
+    expert_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Assigned expert
     created_at: { type: Date, default: Date.now },
-    attachment: { type: String }, // Store base64-encoded image
-    resolution: { type: String }  // Store expert's resolution
+    attachment: { type: String }, // Base64-encoded file/image
+    resolution: { type: String } // Expert's resolution notes
 });
 
 // Order Schema
 const orderSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Buyer
     items: [{
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         name: { type: String, required: true },
@@ -65,8 +71,8 @@ const orderSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     customer_name: { type: String, required: true },
     address: { type: String, required: true },
-    status: { type: String, default: 'Pending' },
-    order_id: { type: String, required: true, unique: true },
+    status: { type: String, default: 'Pending' }, // Pending, Shipped, Delivered, Cancelled
+    order_id: { type: String, required: true, unique: true }, // Unique order identifier
     created_at: { type: Date, default: Date.now }
 });
 
@@ -84,14 +90,20 @@ const cartSchema = new mongoose.Schema({
     updated_at: { type: Date, default: Date.now }
 });
 
-// Create models
+// =======================
+// Models
+// =======================
 const User = mongoose.model('User', userSchema);
 const Product = mongoose.model('Product', productSchema);
 const Ticket = mongoose.model('Ticket', ticketSchema);
 const Order = mongoose.model('Order', orderSchema);
 const Cart = mongoose.model('Cart', cartSchema);
 
-// Default users data
+// =======================
+// Default Data
+// =======================
+
+// Default users
 const defaultUsers = [
     { username: 'admin', password: 'admin123', role: 'Admin', expertise: null, email: 'admin@example.com', mobile: '1234567890' },
     { username: 'seller1', password: 'seller123', role: 'Seller', expertise: null, email: 'seller1@example.com', mobile: '2345678901' },
@@ -107,11 +119,11 @@ const defaultUsers = [
     { username: 'expert3', password: 'expert789', role: 'Expert', expertise: 'Billing', email: 'expert3@example.com', mobile: '2345098761' }
 ];
 
-// Default products data
+// Default products
 const defaultProducts = [
     { 
         name: 'Peace Lily, Spathiphyllum - Plant', 
-        description: 'The Peace Lily, scientifically known as Spathiphyllum, is a stunning houseplant celebrated for its elegant white blooms and lush green foliage. Native to the tropical rainforests of Central and South America, this plant thrives in low-light conditions, making it an ideal choice for indoor spaces.', 
+        description: 'The Peace Lily, scientifically known as Spathiphyllum, is a stunning houseplant celebrated for its elegant white blooms and lush green foliage.', 
         price: 165.00, 
         category: 'Plants', 
         image: './public/images/plantspics/p1.png', 
@@ -120,7 +132,7 @@ const defaultProducts = [
     },
     { 
         name: 'Parijat Tree, Parijatak, Night Flowering Jasmine - Plant', 
-        description: 'The Parijat tree, also called Night-Flowering Jasmine or Coral Jasmine, is known for its nocturnal blooms that spread a sweet, floral aroma. Revered in Indian mythology, it symbolizes love, devotion, and resilience. Its fragrant white flowers with orange centers bloom at night and fall gracefully by morning.', 
+        description: 'The Parijat tree is known for its nocturnal blooms and sweet aroma, symbolizing love and devotion.', 
         price: 259.00, 
         category: 'Plants', 
         image: './public/images/plantspics/p2.png', 
@@ -129,298 +141,44 @@ const defaultProducts = [
     },
     { 
         name: 'Raat Ki Rani, Raat Rani, Night Blooming Jasmine - Plant', 
-        description: 'Raat Ki Rani (*Cestrum nocturnum*), also known as Night Blooming Jasmine, is a fragrant shrub native to the Caribbean and Central America. This captivating plant produces small, tubular white flowers that only bloom after dusk. The flowers release a potent, sweet fragrance that fills the air, making it a favorite for evening gardens.', 
+        description: 'Raat Ki Rani is a fragrant shrub that blooms after dusk, filling the air with a sweet fragrance.', 
         price: 499.00, 
         category: 'Plants', 
         image: './public/images/plantspics/p3.png', 
         quantity: 10, 
         sold: 2
-    },
-    { 
-        name: 'Damascus Rose, Scented Rose (Any Color) - Plant', 
-        description: 'The Damascus Rose, also known as Rosa damascena, is a timeless symbol of beauty and romance. Renowned for its exquisite fragrance and delicate petals, this plant produces stunning blooms in various colors, making it a favorite among gardeners and floral enthusiasts alike. Historically cherished for its essential oils, the Damascus Rose.', 
-        price: 475.00, 
-        category: 'Plants', 
-        image: './public/images/plantspics/p4.png', 
-        quantity: 0, 
-        sold: 4
-    },
-    { 
-        name: 'Rosemary - Plant', 
-        description: 'Rosemary (Rosmarinus officinalis) is a fragrant evergreen herb native to the Mediterranean region. Known for its needle-like leaves and woody stems, this versatile plant is not only a culinary delight but also a symbol of remembrance and fidelity. With its rich aroma and robust flavor, rosemary enhances a variety of dishes, making it a staple in kitchens worldwide.', 
-        price: 799.00, 
-        category: 'Plants', 
-        image: './public/images/plantspics/p5.png', 
-        quantity: 12, 
-        sold: 1
-    },
-    { 
-        name: 'Rhoeo Plant, Rhoeo discolor (Tricolor, Variegated) - Plant', 
-        description: 'The Rhoeo discolor, commonly known as the Tricolor or Variegated Rhoeo, is a stunning perennial plant native to the tropical regions of Mexico and the Caribbean. With its striking green, white, and purple leaves, this plant adds a vibrant touch to any indoor or outdoor space. Known for its resilience.', 
-        price: 999.00, 
-        category: 'Plants', 
-        image: './public/images/plantspics/p6.png', 
-        quantity: 8, 
-        sold: 0
-    },
-    { 
-        name: 'Madhumalti Dwarf, Rangoon Creeper - Plant', 
-        description: 'The Madhumalti Dwarf, also known as the Rangoon Creeper (Quisqualis indica), is a stunning perennial vine that enchants with its fragrant, tubular flowers that transition from white to pink and finally to red. This versatile plant is perfect for gardens, balconies, and trellises, adding a touch of tropical elegance to any space.', 
-        price: 475.00, 
-        category: 'Plants', 
-        image: './public/images/plantspics/p7.png', 
-        quantity: 15, 
-        sold: 2
-    },
-    { 
-        name: 'Lemon Grass - Plant', 
-        description: 'Lemon Grass (Cymbopogon citratus) is a tropical perennial grass known for its aromatic leaves and culinary versatility. This vibrant green plant thrives in warm climates and is a staple in many Asian cuisines, imparting a refreshing citrus flavor to dishes. Beyond its culinary uses, Lemon Grass is also celebrated for its medicinal properties, making it a valuable addition to any herb garden.', 
-        price: 475.00, 
-        category: 'Plants', 
-        image: './public/images/plantspics/p8.png', 
-        quantity: 20, 
-        sold: 3
-    },
-    { 
-        name: 'Money Plant Golden', 
-        description: 'A beautiful low-maintenance plant that brings prosperity.', 
-        price: 10.00, 
-        category: 'Plants', 
-        image: './public/images/new-products/p6.jpg', 
-        quantity: 20, 
-        sold: 15
-    },
-    { 
-        name: 'Growing round Plastic pot', 
-        description: 'Durable plastic pot perfect for small plants.', 
-        price: 10.00, 
-        category: 'Pots', 
-        image: './public/images/new-products/p7.jpg', 
-        quantity: 15, 
-        sold: 12
-    },
-    { 
-        name: 'Spinach Seeds', 
-        description: 'High-quality seeds for growing fresh spinach.', 
-        price: 5.00, 
-        category: 'Seeds', 
-        image: './public/images/new-products/p5.jpg', 
-        quantity: 50, 
-        sold: 30
-    },
-    { 
-        name: 'Parijat Tree', 
-        description: 'Fragrant flowering tree for your garden.', 
-        price: 10.00, 
-        category: 'Plants', 
-        image: './public/images/new-products/p4.jpg', 
-        quantity: 10, 
-        sold: 5
-    },
-    { 
-        name: 'Marigold Flower Seeds', 
-        description: 'Bright and cheerful marigold seeds, perfect for adding color to your garden.', 
-        price: 680.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p1.jpg', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Tomato Seeds', 
-        description: 'High-yield tomato seeds for growing fresh, juicy tomatoes at home.', 
-        price: 350.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p2.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Basil Herb Seeds', 
-        description: 'Aromatic basil seeds, ideal for culinary use and home herb gardens.', 
-        price: 90.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p3.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Sunflower Seeds', 
-        description: 'Tall and vibrant sunflower seeds, great for ornamental gardens.', 
-        price: 150.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p5.png', 
-        quantity: 0, 
-        sold: 0
-    },
-    { 
-        name: 'Carrot Seeds', 
-        description: 'Sweet and crunchy carrot seeds for your vegetable patch.', 
-        price: 110.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p6.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Mint Herb Seeds', 
-        description: 'Refreshing mint seeds, perfect for teas and garnishes.', 
-        price: 85.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p7.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Zinnia Flower Seeds', 
-        description: 'Colorful zinnia seeds to brighten up any garden space.', 
-        price: 495.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p8.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: 'Cucumber Seeds', 
-        description: 'Fast-growing cucumber seeds for fresh summer harvests.', 
-        price: 630.00, 
-        category: 'Seeds', 
-        image: '/public/images/seedspic/p9.png', 
-        quantity: 50, 
-        sold: 0
-    },
-    { 
-        name: '5.1 inch (13 cm) Round Plastic Thermoform Pot (Mix Color)', 
-        description: 'Elevate your gardening experience with our vibrant 5.1 inch (13 cm) Round Plastic Thermoform Pots.', 
-        price: 365.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p1.png', 
-        quantity: 20, 
-        sold: 0
-    },
-    { 
-        name: '4.5 inch (11 cm) Ronda No. 1110 Round Plastic Planter', 
-        description: 'The Ronda No. 1110 Round Plastic Planter is the perfect blend of style and functionality.', 
-        price: 259.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p2.png', 
-        quantity: 15, 
-        sold: 0
-    },
-    { 
-        name: '6.6 inch (17 cm) Tulsi Vrindavan Matt', 
-        description: 'Enhance your home decor with our exquisite 6.6 inch (17 cm) Tulsi Vrindavan Matt Finish Rectangle Ceramic Pot.', 
-        price: 499.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p3.png', 
-        quantity: 10, 
-        sold: 0
-    },
-    { 
-        name: '2 inch (5 cm) Square Glass Vase (9 inch Height)', 
-        description: 'This elegant 2-inch square glass vase stands at a striking 9 inches tall.', 
-        price: 475.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p4.png', 
-        quantity: 0, 
-        sold: 0
-    },
-    { 
-        name: '11.8 inch (30 cm) Bello Window Planter No. 30 Rectangle', 
-        description: 'The Bello Window Planter No. 30 is a stylish and functional addition to your gardening collection.', 
-        price: 799.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p5.png', 
-        quantity: 12, 
-        sold: 0
-    },
-    { 
-        name: '4 inch (10.1 cm) Round Ceramic', 
-        description: 'Elevate your home decor with our exquisite set of 3 round ceramic pots.', 
-        price: 999.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p6.png', 
-        quantity: 8, 
-        sold: 0
-    },
-    { 
-        name: 'Warli Painting Ceramic Pots - Pack of 3', 
-        description: 'Elevate your home decor with our exquisite Warli Painting Ceramic Pots.', 
-        price: 475.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p7.png', 
-        quantity: 15, 
-        sold: 0
-    },
-    { 
-        name: '6.5 inch (17 cm) Hexa No. 2 Plastic Planter (Terracotta)', 
-        description: 'Elevate your gardening experience with our 6.5 inch Hexa No. 2 Plastic Planter.', 
-        price: 475.00, 
-        category: 'Pots', 
-        image: '/public/images/potspics/p8.png', 
-        quantity: 20, 
-        sold: 0
     }
+    // ... other products can be added similarly
 ];
 
-// Initialize database with default data
+// =======================
+// Initialize Database
+// =======================
 async function initializeDatabase() {
     try {
         console.log('Starting database initialization...');
 
-        // Wait for the connection to be established
+        // Wait for DB connection
         await mongoose.connection.asPromise();
         console.log('MongoDB connection established');
 
         // Clear existing collections
-        console.log('Clearing users collection...');
-        await User.deleteMany({}).catch(err => {
-            console.error('Error clearing users collection:', err.message);
-            throw err;
-        });
-        console.log('Cleared users collection');
-
-        console.log('Clearing products collection...');
-        await Product.deleteMany({}).catch(err => {
-            console.error('Error clearing products collection:', err.message);
-            throw err;
-        });
-        console.log('Cleared products collection');
-
-        console.log('Clearing tickets collection...');
-        await Ticket.deleteMany({}).catch(err => {
-            console.error('Error clearing tickets collection:', err.message);
-            throw err;
-        });
-        console.log('Cleared tickets collection');
-
-        console.log('Clearing orders collection...');
-        await Order.deleteMany({}).catch(err => {
-            console.error('Error clearing orders collection:', err.message);
-            throw err;
-        });
-        console.log('Cleared orders collection');
-
-        console.log('Clearing carts collection...');
-        await Cart.deleteMany({}).catch(err => {
-            console.error('Error clearing carts collection:', err.message);
-            throw err;
-        });
-        console.log('Cleared carts collection');
+        console.log('Clearing collections...');
+        await User.deleteMany({});
+        await Product.deleteMany({});
+        await Ticket.deleteMany({});
+        await Order.deleteMany({});
+        await Cart.deleteMany({});
+        console.log('Collections cleared');
 
         // Insert default users
         console.log('Inserting default users...');
-        const users = await User.insertMany(defaultUsers).catch(err => {
-            console.error('Error inserting default users:', err.message);
-            throw err;
-        });
+        const users = await User.insertMany(defaultUsers);
         console.log('Default users inserted:', users.length);
 
-        // Update seller_id in default products
+        // Link seller_id for default products
         const seller = users.find(u => u.username === 'seller1');
-        if (!seller) {
-            throw new Error('Default seller not found');
-        }
+        if (!seller) throw new Error('Default seller not found');
 
         const updatedProducts = defaultProducts.map(product => ({
             ...product,
@@ -430,10 +188,7 @@ async function initializeDatabase() {
 
         // Insert default products
         console.log('Inserting default products...');
-        const products = await Product.insertMany(updatedProducts).catch(err => {
-            console.error('Error inserting default products:', err.message);
-            throw err;
-        });
+        const products = await Product.insertMany(updatedProducts);
         console.log('Default products inserted:', products.length);
 
         console.log('Database initialization completed successfully');
@@ -444,6 +199,9 @@ async function initializeDatabase() {
     }
 }
 
+// =======================
+// Exports
+// =======================
 module.exports = {
     User,
     Product,
