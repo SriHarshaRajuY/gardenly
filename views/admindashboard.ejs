@@ -1,17 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Page Title -->
     <title>Gardenly - Admin Dashboard</title>
+    
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    
+    <!-- Remix Icon Set -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="/public/styles/admindashboard.css">
 </head>
 <body>
-    <!-- Header -->
+
+    <!-- ========== HEADER SECTION ========== -->
     <header class="header">
-        <a href="/" class="logo"><i class="fa-solid fa-leaf"></i> Gardenly Admin</a>
+        <!-- Logo -->
+        <a href="/" class="logo">
+            <i class="fa-solid fa-leaf"></i> Gardenly Admin
+        </a>
+
+        <!-- Navigation Menu -->
         <nav class="navbar">
             <a href="#overview" class="active">Overview</a>
             <a href="#users">Users</a>
@@ -20,31 +35,39 @@
             <a href="#orders">Orders</a>
             <a href="/logout">Logout</a>
         </nav>
+
+        <!-- Hamburger Menu Icon for Mobile -->
         <div id="menu" class="fas fa-bars"></div>
     </header>
 
-    <!-- Main Content -->
+    <!-- ========== MAIN CONTENT SECTION ========== -->
     <main class="admin-container">
-        <!-- Overview Section -->
+
+        <!-- ======= OVERVIEW SECTION ======= -->
         <section id="overview" class="section active">
             <h1 class="heading">Admin Dashboard Overview</h1>
             <div class="line"></div>
+
+            <!-- Metric Cards (Statistics) -->
             <div class="metrics-container">
                 <div class="metric-card">
                     <i class="fas fa-users"></i>
                     <h3>Total Users</h3>
                     <p id="total-users">Loading...</p>
                 </div>
+
                 <div class="metric-card">
                     <i class="fas fa-seedling"></i>
                     <h3>Total Products</h3>
                     <p id="total-products">Loading...</p>
                 </div>
+
                 <div class="metric-card">
                     <i class="fas fa-ticket-alt"></i>
                     <h3>Open Tickets</h3>
                     <p id="open-tickets">Loading...</p>
                 </div>
+
                 <div class="metric-card">
                     <i class="fas fa-dollar-sign"></i>
                     <h3>Total Revenue</h3>
@@ -53,10 +76,12 @@
             </div>
         </section>
 
-        <!-- Users Section -->
+        <!-- ======= USERS SECTION ======= -->
         <section id="users" class="section">
             <h1 class="heading">Manage Users</h1>
             <div class="line"></div>
+
+            <!-- Users Table -->
             <div class="table-container">
                 <table>
                     <thead>
@@ -74,10 +99,12 @@
             </div>
         </section>
 
-        <!-- Products Section -->
+        <!-- ======= PRODUCTS SECTION ======= -->
         <section id="products" class="section">
             <h1 class="heading">Manage Products</h1>
             <div class="line"></div>
+
+            <!-- Products Table -->
             <div class="table-container">
                 <table>
                     <thead>
@@ -95,10 +122,12 @@
             </div>
         </section>
 
-        <!-- Tickets Section -->
+        <!-- ======= TICKETS SECTION ======= -->
         <section id="tickets" class="section">
             <h1 class="heading">Manage Tickets</h1>
             <div class="line"></div>
+
+            <!-- Tickets Table -->
             <div class="table-container">
                 <table>
                     <thead>
@@ -117,11 +146,15 @@
             </div>
         </section>
 
-        <!-- Orders Section -->
+        <!-- ======= ORDERS SECTION ======= -->
         <section id="orders" class="section">
             <h1 class="heading">Manage Orders</h1>
             <div class="line"></div>
+
+            <!-- Optional: Create Order Button -->
             <!-- <button onclick="createOrder()" class="create-button">Create New Order</button> -->
+
+            <!-- Orders Table -->
             <div class="table-container">
                 <table>
                     <thead>
@@ -139,7 +172,7 @@
         </section>
     </main>
 
-    <!-- JavaScript -->
+    <!-- ========== JAVASCRIPT FILE ========== -->
     <script src="/public/scripts/admindashboard.js"></script>
 </body>
 </html>

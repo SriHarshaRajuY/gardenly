@@ -481,14 +481,6 @@ body.dark-theme .product .box-container .box h3 {
   cursor: not-allowed;
 }
 
-.detail-content .buy-now {
-  background: linear-gradient(135deg, #2b6cb0, #4299e1);
-}
-
-.detail-content .buy-now:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4299e1, #2b6cb0);
-}
-
 /* Quantity Selector Styling */
 .quantity {
   display: flex;

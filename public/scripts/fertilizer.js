@@ -15,11 +15,12 @@ const products = [
 
 // Helper function: Creates star rating SVGs
 function createStarRating(rating) {
-    return Array(5).fill('').map((_, index) => 
-        `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${index < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${index < rating ? 'text-yellow-400' : 'text-gray-300'}">
+    return Array.from({ length: 5 }).map((_, index) => {
+        const filled = index < rating;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${filled ? 'text-yellow-400' : 'text-gray-300'}">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>`
-    ).join('');
+        </svg>`;
+    }).join('');
 }
 
 // Function to render products grid
@@ -40,11 +41,12 @@ function renderProducts(productList = products) {
                     ${product.inStock ? 'Add to Cart' : 'Sold Out'}
                 </button>
             </div>
-        </div>
-    `).join('');
+        </div>`
+    ).join('');
 
-    // Add click event to show product details
-    document.querySelectorAll('.product-card').forEach(card => {
+    // Add click listeners after DOM insertion
+    const cards = productsGrid.querySelectorAll('.product-card');
+    cards.forEach(card => {
         card.addEventListener('click', () => {
             const productId = card.dataset.id;
             showProductDetail(productId);
@@ -92,7 +94,6 @@ function showProductDetail(productId) {
         const priceElement = detailContent.querySelector('.price');
         let quantity = 1;
 
-        // Update quantity and total price
         const updateQuantityAndPrice = () => {
             quantityValue.textContent = quantity;
             priceElement.textContent = `₹${product.price * quantity}`;
@@ -100,13 +101,13 @@ function showProductDetail(productId) {
         };
 
         incrementBtn.addEventListener('click', () => {
-            quantity++;
+            quantity += 1;
             updateQuantityAndPrice();
         });
 
         decrementBtn.addEventListener('click', () => {
             if (quantity > 1) {
-                quantity--;
+                quantity -= 1;
                 updateQuantityAndPrice();
             }
         });
@@ -117,7 +118,7 @@ function showProductDetail(productId) {
 
 // Function to apply filters and sorting
 function applyFiltersAndSort() {
-    let filteredProducts = [...products];
+    let filteredProducts = products.slice();
 
     // Filter by category
     const selectedCategories = Array.from(document.querySelectorAll('.filter-category:checked')).map(cb => cb.value);
@@ -128,13 +129,13 @@ function applyFiltersAndSort() {
     // Filter by price range
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
-        filteredProducts = filteredProducts.filter(product => {
-            return selectedPrices.some(range => {
+        filteredProducts = filteredProducts.filter(product =>
+            selectedPrices.some(range => {
                 if (range === '0-200') return product.price <= 200;
                 if (range === '200-400') return product.price > 200 && product.price <= 400;
                 if (range === '400+') return product.price > 400;
-            });
-        });
+            })
+        );
     }
 
     // Filter by availability
@@ -162,19 +163,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Home button click
     const homeBtn = document.querySelector('.home-btn');
-    homeBtn.addEventListener('click', () => {
-        window.location.href = '/';
-    });
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
 
     // Sort button toggle
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
-    const sortItems = sortMenu.querySelectorAll('li');
+    const sortItems = sortMenu ? sortMenu.querySelectorAll('li') : [];
 
-    sortBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sortMenu.classList.toggle('active');
-    });
+    if (sortBtn && sortMenu) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sortMenu.classList.toggle('active');
+        });
+    }
 
     // Apply sorting
     sortItems.forEach(item => {
@@ -195,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderProducts(sortedProducts);
-            sortMenu.classList.remove('active');
+            if (sortMenu) sortMenu.classList.remove('active');
         });
     });
 
@@ -204,24 +209,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');
 
-    filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        filterMenu.classList.toggle('active');
-    });
+    if (filterBtn && filterMenu) {
+        filterBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterMenu.classList.toggle('active');
+        });
+    }
 
     // Apply filters
-    applyFiltersBtn.addEventListener('click', () => {
-        const filteredProducts = applyFiltersAndSort();
-        renderProducts(filteredProducts);
-        filterMenu.classList.remove('active');
-    });
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            const filteredProducts = applyFiltersAndSort();
+            renderProducts(filteredProducts);
+            if (filterMenu) filterMenu.classList.remove('active');
+        });
+    }
 
     // Close sort and filter menus when clicking outside
     document.addEventListener('click', (e) => {
-        if (!sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
+        if (sortMenu && !sortMenu.contains(e.target) && sortBtn && !sortBtn.contains(e.target)) {
             sortMenu.classList.remove('active');
         }
-        if (!filterMenu.contains(e.target) && !filterBtn.contains(e.target)) {
+        if (filterMenu && !filterMenu.contains(e.target) && filterBtn && !filterBtn.contains(e.target)) {
             filterMenu.classList.remove('active');
         }
     });
@@ -229,7 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Back button in product detail
     const backBtn = document.querySelector('.back-btn');
     const productDetail = document.getElementById('product-detail');
-    backBtn.addEventListener('click', () => {
-        productDetail.classList.remove('active');
-    });
+    if (backBtn && productDetail) {
+        backBtn.addEventListener('click', () => {
+            productDetail.classList.remove('active');
+        });
+    }
 });

@@ -1,12 +1,13 @@
+// Import required modules
 const mongoose = require('mongoose');
 require('dotenv').config(); // Load environment variables from .env file
 
 // =======================
 // MongoDB Connection
 // =======================
-mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gardenly', {
     serverSelectionTimeoutMS: 30000, // 30 seconds timeout for server selection
-    bufferCommands: false // Disable command buffering to avoid queuing commands if DB is down
+    bufferCommands: false // Disable command buffering
 })
 .then(() => {
     console.log('Successfully connected to MongoDB');
@@ -22,10 +23,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/gardenly', {
 
 // User Schema
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true }, // unique username
+    username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, required: true }, // Role: Admin, Seller, Buyer, Expert, etc.
-    expertise: { type: String }, // For experts only
+    role: { type: String, required: true }, // Admin, Seller, Buyer, Expert, etc.
+    expertise: { type: String, default: 'General' }, // Default for experts
     email: { type: String, required: true, unique: true },
     mobile: { type: String, required: true, unique: true }
 });
@@ -37,7 +38,7 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     category: { type: String, default: 'General' },
     image: { type: String },
-    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Reference to seller
+    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     quantity: { type: Number, default: 0 },
     sold: { type: Number, default: 0 },
     created_at: { type: Date, default: Date.now },
@@ -50,16 +51,17 @@ const ticketSchema = new mongoose.Schema({
     subject: { type: String, required: true },
     type: { type: String, required: true }, // Issue type: General, Technical, Billing
     description: { type: String, required: true },
-    status: { type: String, default: 'Open' }, // Ticket status
-    expert_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Assigned expert
+    status: { type: String, default: 'Open' },
+    expert_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    attachment: { type: String },
+    resolution: { type: String },
     created_at: { type: Date, default: Date.now },
-    attachment: { type: String }, // Base64-encoded file/image
-    resolution: { type: String } // Expert's resolution notes
+    resolved_at: { type: Date } // Resolution timestamp
 });
 
 // Order Schema
 const orderSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Buyer
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     items: [{
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         name: { type: String, required: true },
@@ -71,8 +73,8 @@ const orderSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     customer_name: { type: String, required: true },
     address: { type: String, required: true },
-    status: { type: String, default: 'Pending' }, // Pending, Shipped, Delivered, Cancelled
-    order_id: { type: String, required: true, unique: true }, // Unique order identifier
+    status: { type: String, default: 'Pending' },
+    order_id: { type: String, required: true, unique: true },
     created_at: { type: Date, default: Date.now }
 });
 
@@ -103,7 +105,6 @@ const Cart = mongoose.model('Cart', cartSchema);
 // Default Data
 // =======================
 
-// Default users
 const defaultUsers = [
     { username: 'admin', password: 'admin123', role: 'Admin', expertise: null, email: 'admin@example.com', mobile: '1234567890' },
     { username: 'seller1', password: 'seller123', role: 'Seller', expertise: null, email: 'seller1@example.com', mobile: '2345678901' },
@@ -119,7 +120,6 @@ const defaultUsers = [
     { username: 'expert3', password: 'expert789', role: 'Expert', expertise: 'Billing', email: 'expert3@example.com', mobile: '2345098761' }
 ];
 
-// Default products
 const defaultProducts = [
     { 
         name: 'Peace Lily, Spathiphyllum - Plant', 
@@ -148,7 +148,6 @@ const defaultProducts = [
         quantity: 10, 
         sold: 2
     }
-    // ... other products can be added similarly
 ];
 
 // =======================
@@ -158,7 +157,7 @@ async function initializeDatabase() {
     try {
         console.log('Starting database initialization...');
 
-        // Wait for DB connection
+        // Wait for MongoDB connection
         await mongoose.connection.asPromise();
         console.log('MongoDB connection established');
 

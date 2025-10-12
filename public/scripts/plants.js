@@ -1,8 +1,6 @@
-// Get products from the data attribute
 const productsData = document.getElementById('products-data');
 const products = JSON.parse(productsData.dataset.products);
 
-// Helper function to create star rating
 function createStarRating(rating) {
     return Array(5).fill('').map((_, index) => 
         `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${index < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${index < rating ? 'text-yellow-400' : 'text-gray-300'}">
@@ -11,7 +9,6 @@ function createStarRating(rating) {
     ).join('');
 }
 
-// Render product cards
 function renderProducts(productList = products) {
     const productsGrid = document.getElementById('products-grid');
     productsGrid.innerHTML = productList.map(product => `
@@ -30,39 +27,37 @@ function renderProducts(productList = products) {
         </div>
     `).join('');
 
-    // Attach event listeners to Add to Cart buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Prevent other click events
+            e.stopPropagation();
             const productId = button.dataset.id;
             const product = products.find(p => p.id === productId);
+
             if (product && product.inStock) {
-                console.log('Adding to cart:', product); // Debug log
                 await addToCart({
                     id: product.id,
                     name: product.name,
-                    price: parseFloat(product.price), // Ensure price is a number
+                    price: parseFloat(product.price),
                     image: product.image,
                     rating: product.rating,
                     description: product.description || 'No description available',
                     inStock: product.inStock,
                     quantity: 1,
-                    category: product.category || 'Plants' // Use product.category
+                    category: product.category || 'Plants'
                 });
             } else {
-                console.error('Product not found or out of stock:', productId);
                 alert('Product not found or out of stock');
             }
         });
     });
 }
 
-// Add to cart function
 async function addToCart(product) {
     try {
         const response = await fetch('/api/check-auth', {
             credentials: 'include'
         });
+
         const authData = await response.json();
         if (!authData.isAuthenticated) {
             window.location.href = '/login';
@@ -81,6 +76,7 @@ async function addToCart(product) {
         });
 
         const cartData = await cartResponse.json();
+
         if (cartResponse.ok) {
             const button = document.querySelector(`.add-to-cart-btn[data-id="${product.id}"]`);
             if (button) {
@@ -101,17 +97,9 @@ async function addToCart(product) {
     }
 }
 
-// Filter and sort products
 function applyFiltersAndSort() {
     let filteredProducts = [...products];
 
-    // Material filter
-    // const selectedMaterials = Array.from(document.querySelectorAll('.filter-material:checked')).map(cb => cb.value);
-    // if (selectedMaterials.length > 0) {
-    //     filteredProducts = filteredProducts.filter(product => selectedMaterials.includes(product.material));
-    // }
-
-    // Price filter
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -119,11 +107,11 @@ function applyFiltersAndSort() {
                 if (range === '0-300') return product.price <= 300;
                 if (range === '300-600') return product.price > 300 && product.price <= 600;
                 if (range === '600+') return product.price > 600;
+                return false;
             });
         });
     }
 
-    // Availability filter
     const selectedAvailability = Array.from(document.querySelectorAll('.filter-availability:checked')).map(cb => cb.value);
     if (selectedAvailability.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -133,7 +121,6 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Rating filter
     const selectedRatings = Array.from(document.querySelectorAll('.filter-rating:checked')).map(cb => parseInt(cb.value));
     if (selectedRatings.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedRatings.some(rating => product.rating >= rating));
@@ -142,16 +129,16 @@ function applyFiltersAndSort() {
     return filteredProducts;
 }
 
-// Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
 
     const homeBtn = document.querySelector('.home-btn');
-    homeBtn.addEventListener('click', () => {
-        window.location.href = '/';
-    });
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
 
-    // Sort menu toggle and functionality
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
     const sortItems = sortMenu.querySelectorAll('li');
@@ -175,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (sortType === 'Name, A to Z') {
                 sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
             } else if (sortType === 'Name, Z to A') {
-                sortedProducts.sort((a, b) => b.name.localeCompare(b.name));
+                sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
             }
 
             renderProducts(sortedProducts);
@@ -183,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Filter menu toggle and functionality
     const filterBtn = document.querySelector('.filter-btn');
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');

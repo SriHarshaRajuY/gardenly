@@ -1,3 +1,4 @@
+// Global array to store cart items
 let cart = [];
 
 // Load cart data from the server
@@ -5,19 +6,16 @@ async function loadCart() {
     try {
         const response = await fetch('/api/cart', {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (response.ok) {
-            // If response is successful, assign the cart items
             cart = data.items || [];
         } else {
             console.error('Failed to load cart:', data.message);
             cart = [];
         }
-        renderCart(); // Render the cart UI
+        renderCart(); // Render the updated cart
     } catch (error) {
         console.error('Error loading cart:', error);
         cart = [];
@@ -32,7 +30,6 @@ function renderCart() {
 
     cartItems.innerHTML = "";
 
-    // Show empty cart message if no items
     if (cart.length === 0) {
         cartItems.innerHTML = `
             <div class="empty-cart">
@@ -45,13 +42,11 @@ function renderCart() {
         return;
     }
 
-    // Display each product in the cart
     cart.forEach((product) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "cart-item";
-        itemDiv.onclick = () => showProductDetails(product); // Click shows product details
+        itemDiv.onclick = () => showProductDetails(product);
 
-        // Create cart item layout
         itemDiv.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
             <div class="item-details">
@@ -71,7 +66,7 @@ function renderCart() {
         cartItems.appendChild(itemDiv);
     });
 
-    updateTotal(); // Update the total price
+    updateTotal(); // Update total price
 }
 
 // Update quantity of a cart item
@@ -79,19 +74,17 @@ async function updateQuantity(productId, change) {
     const product = cart.find((p) => p.product_id === productId);
     if (!product) return;
 
-    const newQuantity = Math.max(1, product.quantity + change); // Minimum quantity = 1
+    const newQuantity = Math.max(1, product.quantity + change);
     try {
         const response = await fetch('/api/cart/update', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ product_id: productId, quantity: newQuantity })
         });
         const data = await response.json();
         if (response.ok) {
             product.quantity = newQuantity;
-            renderCart(); // Re-render cart
+            renderCart();
         } else {
             alert(data.message || 'Failed to update quantity');
         }
@@ -106,13 +99,11 @@ async function removeItem(productId) {
     try {
         const response = await fetch(`/api/cart/remove/${productId}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (response.ok) {
-            cart = cart.filter((p) => p.product_id !== productId); // Remove locally
+            cart = cart.filter((p) => p.product_id !== productId);
             renderCart();
         } else {
             alert(data.message || 'Failed to remove item');
@@ -128,13 +119,11 @@ async function clearCart() {
     try {
         const response = await fetch('/api/cart/clear', {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (response.ok) {
-            cart = []; // Empty cart
+            cart = [];
             renderCart();
         } else {
             alert(data.message || 'Failed to clear cart');
@@ -150,7 +139,6 @@ function updateTotal() {
     const cartTotal = document.getElementById("cart-total");
     if (!cartTotal) return;
 
-    // Calculate total
     const total = cart.reduce((sum, product) => {
         const price = parseFloat(product.price);
         const quantity = parseInt(product.quantity) || 1;
@@ -169,14 +157,13 @@ function showProductDetails(product) {
     const modal = document.getElementById("product-modal");
     if (!modal) return;
 
-    // Fill modal with product info
     document.getElementById("modal-title").textContent = product.name;
     document.getElementById("modal-image").src = product.image;
     document.getElementById("modal-description").textContent = product.description || "No description available";
     document.getElementById("modal-price").textContent = product.price.toFixed(2);
     document.getElementById("modal-rating").textContent = product.rating || "N/A";
     document.getElementById("modal-category").textContent = product.category || "N/A";
-    modal.style.display = "block"; // Show modal
+    modal.style.display = "block";
 }
 
 // Close product details modal
@@ -196,14 +183,12 @@ async function addToCart(product) {
 
         const response = await fetch('/api/cart/add', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ product_id: product.product_id, quantity: 1 })
         });
         const data = await response.json();
         if (response.ok) {
-            await loadCart(); // Reload updated cart
+            await loadCart();
             alert(`${product.name} has been added to your cart!`);
         } else {
             console.error('Failed to add to cart:', data.message);
@@ -225,41 +210,34 @@ function toggleCheckoutForm() {
         return;
     }
 
-    // Clear previous validation errors
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
     checkoutForm.style.display = checkoutForm.style.display === "none" ? "block" : "none";
 }
 
-// Validate checkout form input fields
+// Validate checkout form
 function validateForm(customerName, address, phoneNumber, email, paymentMethod) {
     let isValid = true;
     const phoneRegex = /^\d{10}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Clear previous error messages
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
 
-    // Validate each field
     if (!customerName.trim()) {
         document.getElementById('customer-name-error').textContent = 'Full name is required';
         isValid = false;
     }
-
     if (!address.trim()) {
         document.getElementById('address-error').textContent = 'Delivery address is required';
         isValid = false;
     }
-
     if (!phoneRegex.test(phoneNumber)) {
         document.getElementById('phone-number-error').textContent = 'Phone number must be exactly 10 digits';
         isValid = false;
     }
-
     if (!emailRegex.test(email)) {
         document.getElementById('email-error').textContent = 'Invalid email format';
         isValid = false;
     }
-
     if (!paymentMethod) {
         document.getElementById('payment-method-error').textContent = 'Please select a payment method';
         isValid = false;
@@ -268,7 +246,7 @@ function validateForm(customerName, address, phoneNumber, email, paymentMethod) 
     return isValid;
 }
 
-// Submit order details to the server
+// Submit order
 async function submitOrder() {
     const customerName = document.getElementById("customer-name").value.trim();
     const address = document.getElementById("address").value.trim();
@@ -277,17 +255,12 @@ async function submitOrder() {
     const paymentMethod = document.getElementById("payment-method").value;
     const comments = document.getElementById("comments").value.trim();
 
-    // Validate before submission
-    if (!validateForm(customerName, address, phoneNumber, email, paymentMethod)) {
-        return;
-    }
+    if (!validateForm(customerName, address, phoneNumber, email, paymentMethod)) return;
 
     try {
         const response = await fetch('/api/delivery/create-order', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 customer_name: customerName,
                 address: address,
@@ -301,11 +274,10 @@ async function submitOrder() {
         const data = await response.json();
         if (response.ok) {
             alert(`Order placed successfully! Order ID: ${data.orderId}`);
-            cart = []; // Clear cart after successful order
+            cart = [];
             renderCart();
             toggleCheckoutForm();
 
-            // Reset form fields
             document.getElementById("customer-name").value = "";
             document.getElementById("address").value = "";
             document.getElementById("phone-number").value = "";
@@ -321,37 +293,30 @@ async function submitOrder() {
     }
 }
 
-// Event listeners when DOM is loaded
+// Event listeners on DOM load
 document.addEventListener("DOMContentLoaded", () => {
-    loadCart(); // Load cart items immediately
+    loadCart();
 
     const clearCartBtn = document.getElementById("clear-cart-btn");
-    if (clearCartBtn) {
-        clearCartBtn.addEventListener("click", clearCart);
-    }
+    if (clearCartBtn) clearCartBtn.addEventListener("click", clearCart);
 
     const checkoutBtn = document.getElementById("checkout-btn");
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener("click", toggleCheckoutForm);
-    }
+    if (checkoutBtn) checkoutBtn.addEventListener("click", toggleCheckoutForm);
 
     const submitOrderBtn = document.getElementById("submit-order-btn");
-    if (submitOrderBtn) {
-        submitOrderBtn.addEventListener("click", submitOrder);
-    }
+    if (submitOrderBtn) submitOrderBtn.addEventListener("click", submitOrder);
 
     const cancelCheckoutBtn = document.getElementById("cancel-checkout-btn");
     if (cancelCheckoutBtn) {
         cancelCheckoutBtn.addEventListener("click", () => {
-            // Reset all input fields
             document.getElementById("customer-name").value = "";
             document.getElementById("address").value = "";
             document.getElementById("phone-number").value = "";
             document.getElementById("email").value = "";
-            document.getElementById("payment=TMethod").value = "";
+            document.getElementById("payment-method").value = "";
             document.getElementById("comments").value = "";
             document.querySelectorAll('.error').forEach(error => error.textContent = '');
-            toggleCheckoutForm(); // Hide the checkout form
+            toggleCheckoutForm();
         });
     }
 });

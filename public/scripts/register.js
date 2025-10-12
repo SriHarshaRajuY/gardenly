@@ -1,16 +1,14 @@
-//  Global Execution Context (GEC) is created when this script starts running.
-//    - Variables and functions are hoisted.
-//    - Then line-by-line execution begins.
+// Global Execution Context (GEC) is created when this script starts running.
+// Variables and functions are hoisted, then line-by-line execution begins.
 
 // 🔹 Selecting all required DOM elements
 const inputs = document.querySelectorAll(".input");
 const form = document.querySelector("#register-form");
 const passwordInput = document.querySelector("#password");
-const errorMessage = document.querySelector("#error-message");
+const errorMessage = document.querySelector("#error-message"); // Ensure this exists in HTML
 
 // 🧩 Function to add 'focus' class when input is active
 function addcl() {
-    // 'this' refers to the input field that triggered the event
     let parent = this.parentNode.parentNode;
     parent.classList.add("focus");
 }
@@ -25,117 +23,136 @@ function remcl() {
 
 // 🔹 Adding focus and blur event listeners to each input field
 inputs.forEach((input) => {
-    // ✅ Each event listener creates its own small function execution context
     input.addEventListener("focus", addcl);
     input.addEventListener("blur", remcl);
 });
 
-// 🧩 Validation functions (pure functions - return boolean)
+// 🧩 Validation functions
 function validateUsername(username) {
-    // 3-20 characters, can include letters, numbers, underscore, or hyphen
     return /^[a-zA-Z0-9_-]{3,20}$/.test(username);
 }
 
 function validatePassword(password) {
-    // Must have 1 uppercase, 1 special symbol, 1 number, min 8 chars
     return /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$/.test(password);
 }
 
 function validateEmail(email) {
-    // Simple rule: must end with .com and have @
-    return /^[^\s@]+@[^\s@]+\.com$/.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Allows any domain
 }
 
 function validateMobile(mobile) {
-    // Exactly 10 digits only
     return /^\d{10}$/.test(mobile);
 }
 
 // 🔹 Real-time validation as user types
 inputs.forEach((input) => {
     input.addEventListener("input", function() {
-        // 'this' refers to the input currently being typed in
-        const value = this.value;
+        const value = this.value.trim();
+        let errorText = "";
 
-        // 🧩 Check which input is being typed (by its name attribute)
         switch (this.name) {
             case "username":
                 if (!validateUsername(value) && value !== "") {
-                    errorMessage.textContent = "Username: 3-20 chars (letters, numbers, _, - only)";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Username: 3-20 chars (letters, numbers, _, - only)";
                 }
                 break;
-
             case "password":
                 if (!validatePassword(value) && value !== "") {
-                    errorMessage.textContent = "Password: 8+ chars, 1 upper, 1 number, 1 symbol";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Password: 8+ chars, 1 upper, 1 number, 1 symbol";
                 }
                 break;
-
             case "email":
                 if (!validateEmail(value) && value !== "") {
-                    errorMessage.textContent = "Email must be valid and end with .com";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Invalid email format";
                 }
                 break;
-
             case "mobile":
                 if (!validateMobile(value) && value !== "") {
-                    errorMessage.textContent = "Mobile must be exactly 10 digits";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Mobile must be exactly 10 digits";
                 }
                 break;
+        }
+
+        if (errorMessage) {
+            errorMessage.textContent = errorText;
+            errorMessage.style.display = errorText ? 'block' : 'none';
+        }
+    });
+
+    input.addEventListener('focus', function() {
+        if (errorMessage) {
+            errorMessage.textContent = "";
+            errorMessage.style.display = 'none';
         }
     });
 });
 
 // 🔹 Form submission validation
-form.addEventListener("submit", (e) => {
-    // ✅ Execution context for this callback is created only on form submission
-    const username = form.querySelector("input[name='username']").value;
-    const password = passwordInput.value;
-    const email = form.querySelector("input[name='email']").value;
-    const mobile = form.querySelector("input[name='mobile']").value;
+form.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent default submission
+
+    const username = form.querySelector("input[name='username']").value.trim();
+    const password = passwordInput.value.trim();
+    const email = form.querySelector("input[name='email']").value.trim();
+    const mobile = form.querySelector("input[name='mobile']").value.trim();
     const role = form.querySelector("select[name='role']").value;
 
-    // 🧩 Validate each field before allowing submission
+    // Client-side validation
+    let errorText = "";
     if (!validateUsername(username)) {
-        e.preventDefault(); // Stop form submission
-        errorMessage.textContent = "Invalid username format";
+        errorText = "Invalid username format";
+    } else if (!validatePassword(password)) {
+        errorText = "Invalid password format";
+    } else if (!validateEmail(email)) {
+        errorText = "Invalid email format";
+    } else if (!validateMobile(mobile)) {
+        errorText = "Mobile number must be exactly 10 digits";
+    } else if (!role) {
+        errorText = "Please select a role";
+    }
+
+    if (errorText) {
+        if (errorMessage) {
+            errorMessage.textContent = errorText;
+            errorMessage.style.display = 'block';
+        } else {
+            alert(errorText);
+        }
         return;
     }
 
-    if (!validatePassword(password)) {
-        e.preventDefault();
-        errorMessage.textContent = "Invalid password format";
-        return;
+    if (errorMessage) {
+        errorMessage.textContent = "";
+        errorMessage.style.display = 'none';
     }
 
-    if (!validateEmail(email)) {
-        e.preventDefault();
-        errorMessage.textContent = "Email must be valid and end with .com";
-        return;
-    }
+    const data = { username, password, role, email, mobile };
 
-    if (!validateMobile(mobile)) {
-        e.preventDefault();
-        errorMessage.textContent = "Mobile number must be exactly 10 digits";
-        return;
-    }
+    try {
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-    if (!role) {
-        e.preventDefault();
-        errorMessage.textContent = "Please select a role";
-        return;
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            const errorData = await response.text();
+            if (errorMessage) {
+                errorMessage.textContent = errorData || 'Registration failed';
+                errorMessage.style.display = 'block';
+            } else {
+                alert(errorData || 'Registration failed');
+            }
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        if (errorMessage) {
+            errorMessage.textContent = 'Server error during registration';
+            errorMessage.style.display = 'block';
+        } else {
+            alert('Server error during registration');
+        }
     }
-
-    // ✅ If all validations pass, form submits normally
 });
-
-// ✅ End of script
-// Global Execution Context remains in memory until page is closed or reloaded.

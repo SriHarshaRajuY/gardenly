@@ -78,7 +78,7 @@ form {
 }
 
 .input-div.role {
-    margin-top: 15px; /* Adjust spacing after Welcome/Register title */
+    margin-top: 15px;
 }
 
 .i {
@@ -159,9 +159,6 @@ form {
 
 .input-div > div > select {
     cursor: pointer;
-}
-
-.input-div > div > select {
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23999" d="M2 4l4 4 4-4z"/></svg>') no-repeat right 0.7rem center;
     background-size: 12px;
 }
@@ -170,13 +167,12 @@ form {
     margin-bottom: 20px;
 }
 
-/* Error message styling */
 .error-message {
     display: block;
-    color: #e74c3c; /* Red color for error */
+    color: #e74c3c;
     font-size: 0.8rem;
     text-align: left;
-    margin: -20px 0 10px 40px; /* Adjust spacing to align with input */
+    margin: -20px 0 10px 40px;
     font-family: 'Poppins', sans-serif;
 }
 
@@ -214,7 +210,7 @@ a:hover {
 .btn:hover {
     background-position: right;
 }
-/* Home button styling */
+
 .home-btn {
     position: fixed;
     top: 20px;
@@ -238,6 +234,7 @@ a:hover {
     color: #38d39f;
     background-color: rgba(56, 211, 159, 0.1);
 }
+
 @media screen and (max-width: 1050px) {
     .container {
         grid-gap: 5rem;
