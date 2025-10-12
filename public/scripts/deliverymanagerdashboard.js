@@ -1,6 +1,4 @@
-// Theme Management
-const themeToggle = document.getElementById('theme-toggle');
-const themeSelectorBtn = document.getElementById('theme-selector-btn');
+
 
 // Load saved theme preference
 const savedTheme = localStorage.getItem('theme') || 'light';
