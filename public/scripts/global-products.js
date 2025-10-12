@@ -1,4 +1,5 @@
-
+// This file exposes the product arrays to the global scope
+// so they can be accessed for search functionality on different pages.
 
 document.addEventListener("DOMContentLoaded", () => {
     // Declare a local variable 'products'. 
