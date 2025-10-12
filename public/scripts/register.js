@@ -20,7 +20,6 @@ inputs.forEach((input) => {
     input.addEventListener("blur", remcl);
 });
 
-// Validation functions
 function validateUsername(username) {
     return /^[a-zA-Z0-9_-]{3,20}$/.test(username);
 }
@@ -37,7 +36,6 @@ function validateMobile(mobile) {
     return /^\d{10}$/.test(mobile);
 }
 
-// Real-time validation
 inputs.forEach((input) => {
     input.addEventListener("input", function() {
         const value = this.value;
@@ -111,4 +109,10 @@ form.addEventListener("submit", (e) => {
         errorMessage.textContent = "Please select a role";
         return;
     }
+});
+
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        errorMessage.textContent = "";
+    });
 });

@@ -1,8 +1,6 @@
-// 🌿 Get products data from the HTML element (data attribute)
 const productsData = document.getElementById('products-data');
 const products = JSON.parse(productsData.dataset.products);
 
-// ⭐ Helper function to create star rating dynamically using SVG icons
 function createStarRating(rating) {
     return Array(5).fill('').map((_, index) => 
         `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${index < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${index < rating ? 'text-yellow-400' : 'text-gray-300'}">
@@ -11,7 +9,6 @@ function createStarRating(rating) {
     ).join('');
 }
 
-// 🪴 Function to render product cards dynamically on the page
 function renderProducts(productList = products) {
     const productsGrid = document.getElementById('products-grid');
     productsGrid.innerHTML = productList.map(product => `
@@ -30,16 +27,13 @@ function renderProducts(productList = products) {
         </div>
     `).join('');
 
-    // 🎯 Add event listeners for all "Add to Cart" buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
-            e.stopPropagation(); // prevent event bubbling
+            e.stopPropagation();
             const productId = button.dataset.id;
             const product = products.find(p => p.id === productId);
 
-            // Check if product is available before adding to cart
             if (product && product.inStock) {
-                console.log('Adding to cart:', product);
                 await addToCart({
                     id: product.id,
                     name: product.name,
@@ -52,29 +46,24 @@ function renderProducts(productList = products) {
                     category: product.category || 'Plants'
                 });
             } else {
-                console.error('Product not found or out of stock:', productId);
                 alert('Product not found or out of stock');
             }
         });
     });
 }
 
-// 🛒 Add to Cart functionality
 async function addToCart(product) {
     try {
-        // ✅ Fetch 1: Check if user is authenticated
         const response = await fetch('/api/check-auth', {
-            credentials: 'include' // include cookies/session data
+            credentials: 'include'
         });
 
         const authData = await response.json();
         if (!authData.isAuthenticated) {
-            // redirect to login if not logged in
             window.location.href = '/login';
             return;
         }
 
-        // ✅ Fetch 2: Send POST request to add product to the cart
         const cartResponse = await fetch('/api/cart/add', {
             method: 'POST',
             headers: {
@@ -86,11 +75,9 @@ async function addToCart(product) {
             })
         });
 
-        // Parse server response
         const cartData = await cartResponse.json();
 
         if (cartResponse.ok) {
-            // ✅ Update UI for feedback when product is added successfully
             const button = document.querySelector(`.add-to-cart-btn[data-id="${product.id}"]`);
             if (button) {
                 button.innerHTML = '<i class="fas fa-check"></i> Added';
@@ -102,21 +89,17 @@ async function addToCart(product) {
             }
             alert(`${product.name} has been added to your cart!`);
         } else {
-            // ❌ Handle backend error response
             alert(cartData.message || 'Failed to add product to cart');
         }
     } catch (error) {
-        // ⚠️ Handle network or unexpected errors
         console.error('Error adding to cart:', error);
         alert('Failed to add product to cart');
     }
 }
 
-// 🔍 Apply filters and sorting based on user selections
 function applyFiltersAndSort() {
     let filteredProducts = [...products];
 
-    // 💰 Filter by price range
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -124,11 +107,11 @@ function applyFiltersAndSort() {
                 if (range === '0-300') return product.price <= 300;
                 if (range === '300-600') return product.price > 300 && product.price <= 600;
                 if (range === '600+') return product.price > 600;
+                return false;
             });
         });
     }
 
-    // 🟢 Filter by availability (in stock / out of stock)
     const selectedAvailability = Array.from(document.querySelectorAll('.filter-availability:checked')).map(cb => cb.value);
     if (selectedAvailability.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -138,7 +121,6 @@ function applyFiltersAndSort() {
         });
     }
 
-    // ⭐ Filter by minimum rating
     const selectedRatings = Array.from(document.querySelectorAll('.filter-rating:checked')).map(cb => parseInt(cb.value));
     if (selectedRatings.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedRatings.some(rating => product.rating >= rating));
@@ -147,17 +129,16 @@ function applyFiltersAndSort() {
     return filteredProducts;
 }
 
-// 🚀 Initialize everything once the page is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    renderProducts(); // show all products initially
+    renderProducts();
 
-    // 🏠 Home button navigation
     const homeBtn = document.querySelector('.home-btn');
-    homeBtn.addEventListener('click', () => {
-        window.location.href = '/';
-    });
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
 
-    // 🔽 Sort menu functionality
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
     const sortItems = sortMenu.querySelectorAll('li');
@@ -167,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sortMenu.classList.toggle('active');
     });
 
-    // 🧩 Sorting logic based on user choice
     sortItems.forEach(item => {
         item.addEventListener('click', () => {
             const sortType = item.textContent;
@@ -190,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ⚙️ Filter menu functionality
     const filterBtn = document.querySelector('.filter-btn');
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');
@@ -200,14 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         filterMenu.classList.toggle('active');
     });
 
-    // Apply filters when user clicks “Apply”
     applyFiltersBtn.addEventListener('click', () => {
         const filteredProducts = applyFiltersAndSort();
         renderProducts(filteredProducts);
         filterMenu.classList.remove('active');
     });
 
-    // Close menus when clicking outside
     document.addEventListener('click', (e) => {
         if (!sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
             sortMenu.classList.remove('active');
