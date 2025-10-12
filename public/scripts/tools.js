@@ -1,3 +1,4 @@
+
 // Get products from the data attribute
 const productsData = document.getElementById('products-data');
 const products = JSON.parse(productsData.dataset.products);
