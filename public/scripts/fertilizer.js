@@ -1,4 +1,4 @@
-// Sample list of products
+
 const products = [
     {
         id: '1',
