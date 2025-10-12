@@ -1,9 +1,7 @@
-
-// Retrieve products data from the DOM
 const productsData = document.getElementById('products-data');
 const products = JSON.parse(productsData.dataset.products);
 
-// Helper function to generate star rating HTML
+// Helper function to create star rating
 function createStarRating(rating) {
     return Array(5).fill('').map((_, index) => 
         `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${index < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${index < rating ? 'text-yellow-400' : 'text-gray-300'}">
@@ -12,7 +10,7 @@ function createStarRating(rating) {
     ).join('');
 }
 
-// Function to render product cards in the grid
+// Render product cards
 function renderProducts(productList = products) {
     const productsGrid = document.getElementById('products-grid');
     productsGrid.innerHTML = productList.map(product => `
@@ -31,7 +29,7 @@ function renderProducts(productList = products) {
         </div>
     `).join('');
 
-    // Attach event listeners to add-to-cart buttons
+    // Add event listeners to "Add to Cart" buttons
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', async (e) => {
             e.stopPropagation();
@@ -58,7 +56,7 @@ function renderProducts(productList = products) {
     });
 }
 
-// Asynchronous function to add a product to the cart
+// Add to cart
 async function addToCart(product) {
     try {
         if (!product || !product.id) {
@@ -67,7 +65,7 @@ async function addToCart(product) {
             return;
         }
 
-        // Check if user is authenticated
+        // Check authentication
         const authResponse = await fetch('/api/check-auth', {
             credentials: 'include'
         });
@@ -78,7 +76,6 @@ async function addToCart(product) {
             return;
         }
 
-        // Send add-to-cart request to server
         const response = await fetch('/api/cart/add', {
             method: 'POST',
             headers: {
@@ -88,7 +85,6 @@ async function addToCart(product) {
         });
         const data = await response.json();
         if (response.ok) {
-            // Update button UI temporarily on success
             const button = document.querySelector(`.add-to-cart[data-id="${product.id}"]`);
             if (button) {
                 button.innerHTML = '<i class="fas fa-check"></i> Added';
@@ -109,17 +105,17 @@ async function addToCart(product) {
     }
 }
 
-// Function to apply filters to the product list
+// Filter and sort products
 function applyFiltersAndSort() {
     let filteredProducts = [...products];
 
-    // Apply material filter
+    // Material filter
     const selectedMaterials = Array.from(document.querySelectorAll('.filter-material:checked')).map(cb => cb.value);
     if (selectedMaterials.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedMaterials.includes(product.material));
     }
 
-    // Apply price filter
+    // Price filter
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -131,7 +127,7 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Apply availability filter
+    // Availability filter
     const selectedAvailability = Array.from(document.querySelectorAll('.filter-availability:checked')).map(cb => cb.value);
     if (selectedAvailability.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -141,7 +137,7 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Apply rating filter
+    // Rating filter
     const selectedRatings = Array.from(document.querySelectorAll('.filter-rating:checked')).map(cb => parseInt(cb.value));
     if (selectedRatings.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedRatings.some(rating => product.rating >= rating));
@@ -150,18 +146,16 @@ function applyFiltersAndSort() {
     return filteredProducts;
 }
 
-// Event listener for DOM content loaded to initialize page
+// Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
-    // Render initial products
     renderProducts();
 
-    // Home button event listener
     const homeBtn = document.querySelector('.home-btn');
     homeBtn.addEventListener('click', () => {
         window.location.href = '/';
     });
 
-    // Sort button and menu functionality
+    // Sort menu toggle and functionality
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
     const sortItems = sortMenu.querySelectorAll('li');
@@ -171,13 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sortMenu.classList.toggle('active');
     });
 
-    // Handle sort item clicks
     sortItems.forEach(item => {
         item.addEventListener('click', () => {
             const sortType = item.textContent;
             let sortedProducts = applyFiltersAndSort();
 
-            // Apply sorting based on selected type
             if (sortType === 'Price, low to high') {
                 sortedProducts.sort((a, b) => a.price - b.price);
             } else if (sortType === 'Price, high to low') {
@@ -190,13 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 sortedProducts.sort((a, b) => b.name.localeCompare(b.name));
             }
 
-            // Re-render sorted products
             renderProducts(sortedProducts);
             sortMenu.classList.remove('active');
         });
     });
 
-    // Filter button and menu functionality
+    // Filter menu toggle and functionality
     const filterBtn = document.querySelector('.filter-btn');
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');
@@ -212,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         filterMenu.classList.remove('active');
     });
 
-    // Close menus on outside clicks
     document.addEventListener('click', (e) => {
         if (!sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
             sortMenu.classList.remove('active');
