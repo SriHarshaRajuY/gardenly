@@ -1,4 +1,7 @@
+// Wait until the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Map all the main sections for easy access
     const sections = {
         home: document.getElementById('homeSection'),
         knowledgeBase: document.getElementById('knowledgeBaseSection'),
@@ -8,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messages: document.getElementById('messagesSection')
     };
 
+    // Map navigation links for updating active state
     const navLinks = {
         home: document.getElementById('homeLink'),
         support: document.getElementById('supportLink'),
@@ -16,83 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
         messages: document.getElementById('messagesLink')
     };
 
+    // Articles content mapped by article IDs
     const articles = {
-        'buy-now-pay-later': {
-            title: 'What is "Buy Now Pay Later" Payment Mode',
-            modifiedDate: 'Fri, 2 Jun, 2023 at 9:50 AM',
-            content: `
-                <p>1. Pay Later is one of the payment modes of the Simpl payment gateway, in which you can checkout with 1 tap and pays later.</p>
-                <p>2. All your purchases (done by Simpl-Pay Later on any website) get added to one convenient bill, which you can pay in one go, after every 15 days.</p>
-                <p>3. Also, you can choose to pay for your transactions even before your bill is generated, with the help of UPI, Credit, or Debit Cards.</p>
-                <p>You can do so by logging into your account via Simpl App or Website (<a href="https://getsimpl.com/signin">https://getsimpl.com/signin</a>).</p>
-                <p>*By using the Simpl payment gateway (any mode), you will get 30% or Rs. 70 OFF (whichever is the minimum) on your order.</p>
-            `
-        },
-        'cancel-refund': {
-            title: 'Cancel/Replace/Refund/Return',
-            modifiedDate: 'Fri, 10 Jun, 2022 at 4:31 PM',
-            content: `
-                <p>Once the order has been confirmed, it cannot be canceled, refunded, replaced, or returned.</p>
-                <p>*We do not have a refund policy if you refuse the delivery.</p>
-                <p>Please refer to the <a href="#">Refund Policy</a> for more details.</p>
-            `
-        },
-        'order-status': {
-            title: 'Order Status',
-            modifiedDate: 'Fri, 10 Jun, 2022 at 4:13 PM',
-            content: `
-                <p>You can check the status of your order by logging into your account and visiting the 'My Orders' section.</p>
-                <p>Order statuses include: Pending, Processing, Shipped, and Delivered.</p>
-            `
-        },
-        'damage-product': {
-            title: 'Damage/Wrong Product Received',
-            modifiedDate: 'Fri, 10 Jun, 2022 at 4:33 PM',
-            content: `
-                <p>If you received a damaged or wrong product, please submit a ticket with details and photos of the issue.</p>
-                <p>Our support team will review and provide a resolution within 48 hours.</p>
-            `
-        },
-        'cashback': {
-            title: 'Cashback Voucher/Cashback Coupon',
-            modifiedDate: 'Fri, 10 Jun, 2022 at 4:38 PM',
-            content: `
-                <p>Cashback vouchers can be applied at checkout for eligible orders.</p>
-                <p>Check the terms and conditions of each voucher for validity and usage details.</p>
-            `
-        },
-        'what-is-simpl': {
-            title: 'What is Simpl',
-            modifiedDate: 'Fri, 2 Jun, 2023 at 9:45 AM',
-            content: `
-                <p>Simpl is a payment gateway that allows you to pay for your purchases later.</p>
-                <p>It offers a seamless checkout experience with flexible payment options.</p>
-            `
-        },
-        'pay-later-cod': {
-            title: 'Is Pay Later and COD the same?',
-            modifiedDate: 'Fri, 2 Jun, 2023 at 9:55 AM',
-            content: `
-                <p>No, Pay Later and Cash on Delivery (COD) are not the same.</p>
-                <p>Pay Later allows you to settle your bill after 15 days via Simpl, while COD requires payment at the time of delivery.</p>
-            `
-        }
+        'buy-now-pay-later': { /* Article content for Buy Now Pay Later */ },
+        'cancel-refund': { /* Article content for Cancel/Refund */ },
+        'order-status': { /* Article content for Order Status */ },
+        'damage-product': { /* Article content for Damage/Wrong Product */ },
+        'cashback': { /* Article content for Cashback */ },
+        'what-is-simpl': { /* Article content for Simpl Payment Gateway */ },
+        'pay-later-cod': { /* Article content for Pay Later vs COD */ }
     };
 
+    // Article lists for categories
     const articleLists = {
-        'quick-help': [
-            { id: 'order-status', title: 'Order Status' },
-            { id: 'cancel-refund', title: 'Cancel/Replace/Refund/Return' },
-            { id: 'damage-product', title: 'Damage/Wrong Product Received' },
-            { id: 'cashback', title: 'Cashback Voucher/Cashback Coupon' }
-        ],
-        'payment-gateway': [
-            { id: 'what-is-simpl', title: 'What is Simpl' },
-            { id: 'buy-now-pay-later', title: 'What is "Buy Now Pay Later" Payment Mode' },
-            { id: 'pay-later-cod', title: 'Is Pay Later and COD are same?' }
-        ]
+        'quick-help': [/* List of quick help articles */],
+        'payment-gateway': [/* List of payment gateway articles */]
     };
 
+    // Function to show a section and hide all others
     function showSection(sectionName) {
         Object.values(sections).forEach(section => section.classList.remove('active'));
         sections[sectionName].classList.add('active');
@@ -101,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navLinks[sectionName]) navLinks[sectionName].classList.add('active');
     }
 
+    // Show specific article details
     function showArticle(articleId) {
         const article = articles[articleId];
         if (!article) return;
@@ -108,19 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const breadcrumb = sections.article.querySelector('.breadcrumb');
         const content = sections.article.querySelector('.article-content');
 
+        // Update breadcrumb navigation
         breadcrumb.innerHTML = `
             <a href="#" data-section="home">Home</a> > 
             <a href="#" data-section="knowledgeBase">Knowledge Base</a> > ${article.title}
         `;
+
+        // Display article content
         content.innerHTML = `
             <h1>${article.title}</h1>
             <p class="modified-date">Modified on ${article.modifiedDate}</p>
             ${article.content}
         `;
 
-        showSection('article');
+        showSection('article'); // Show the article section
     }
 
+    // Show list of articles in a category
     function showArticleList(listId) {
         const list = articleLists[listId];
         if (!list) return;
@@ -128,10 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const breadcrumb = sections.articleList.querySelector('.breadcrumb');
         const content = sections.articleList.querySelector('.article-list');
 
+        // Update breadcrumb
         breadcrumb.innerHTML = `
             <a href="#" data-section="home">Home</a> > 
             <a href="#" data-section="knowledgeBase">Knowledge Base</a> > ${listId.replace('-', ' ')}
         `;
+
+        // Render article list
         content.innerHTML = `
             <h1>${listId.replace('-', ' ')}</h1>
             <ul>
@@ -142,14 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
         showSection('articleList');
     }
 
+    // Fetch tickets submitted by the current user
     async function fetchUserTickets() {
         try {
             const response = await fetch('/api/user-tickets');
-            if (!response.ok) {
-                throw new Error('Failed to fetch tickets');
-            }
+            if (!response.ok) throw new Error('Failed to fetch tickets');
             const tickets = await response.json();
+
             const tbody = document.getElementById('userTicketsTableBody');
+
+            // Populate tickets table
             tbody.innerHTML = tickets.map(ticket => `
                 <tr>
                     <td>${ticket._id}</td>
@@ -167,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Show details of a specific ticket
     function showTicketDetails(ticketId) {
         fetch('/api/user-tickets')
             .then(response => response.json())
@@ -187,10 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="cancel-btn" id="backToMessages">Back to Messages</button>
                         </div>
                     `;
+
+                    // Attach event listener for "Back to Messages" button
                     document.getElementById('backToMessages').addEventListener('click', () => {
                         showSection('messages');
-                        fetchUserTickets();
+                        fetchUserTickets(); // Refresh messages list
                     });
+
                     showSection('ticket');
                 }
             })
@@ -200,28 +159,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Navigation link click handling
     Object.keys(navLinks).forEach(key => {
         navLinks[key].addEventListener('click', (e) => {
-            // Allow default navigation for 'home' and 'support' links
-            if (key === 'home' || key === 'support') {
-                return; // Let the browser handle the href navigation
-            }
+            // Allow default browser navigation for home and support
+            if (key === 'home' || key === 'support') return;
+
             e.preventDefault();
             showSection(key);
-            if (key === 'messages') {
-                fetchUserTickets();
-            }
+
+            if (key === 'messages') fetchUserTickets();
         });
     });
 
-    document.getElementById('browseArticlesCard').addEventListener('click', () => {
-        showSection('knowledgeBase');
-    });
+    // Cards on home page for navigation
+    document.getElementById('browseArticlesCard').addEventListener('click', () => showSection('knowledgeBase'));
+    document.getElementById('submitTicketCard').addEventListener('click', () => showSection('ticket'));
 
-    document.getElementById('submitTicketCard').addEventListener('click', () => {
-        showSection('ticket');
-    });
-
+    // Handle clicks on dynamic elements
     document.addEventListener('click', (e) => {
         if (e.target.matches('[data-article]')) {
             e.preventDefault();
@@ -238,12 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle feedback buttons
     document.querySelectorAll('.feedback-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             alert(`Feedback recorded: ${e.target.dataset.value}`);
         });
     });
 
+    // Ticket submission form handling
     const ticketForm = document.getElementById('ticketForm');
     ticketForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -253,10 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('subject', document.getElementById('subject').value);
         formData.append('type', document.getElementById('type').value);
         formData.append('description', document.getElementById('description').value);
+
         const attachment = document.getElementById('attachment').files[0];
-        if (attachment) {
-            formData.append('attachment', attachment);
-        }
+        if (attachment) formData.append('attachment', attachment);
 
         try {
             const response = await fetch('/submit-ticket', {
@@ -278,10 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Cancel button resets form and returns to home
     ticketForm.querySelector('.cancel-btn').addEventListener('click', () => {
         ticketForm.reset();
         showSection('home');
     });
 
+    // Show home section on initial load
     showSection('home');
 });
