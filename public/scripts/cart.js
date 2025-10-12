@@ -1,16 +1,16 @@
-// cart.js
+
+
 let cart = [];
 
-// Load cart from server
-async function loadCart() {  // async: Allows the function to perform asynchronous operations like fetching data from the server without blocking the main thread
+async function loadCart() {
     try {
-        const response = await fetch('/api/cart', {  // fetch: Makes an asynchronous HTTP GET request to retrieve the user's cart data from the server API
+        const response = await fetch('/api/cart', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();  // Awaits the parsing of the JSON response from the fetch request
+        const data = await response.json();
         if (response.ok) {
             cart = data.items || [];
         } else {
@@ -25,7 +25,6 @@ async function loadCart() {  // async: Allows the function to perform asynchrono
     }
 }
 
-// Render cart items
 function renderCart() {
     const cartItems = document.getElementById("cart-items");
     if (!cartItems) return;
@@ -71,21 +70,20 @@ function renderCart() {
     updateTotal();
 }
 
-// Update quantity
-async function updateQuantity(productId, change) {  // async: Enables asynchronous update of cart item quantity by sending a request to the server
+async function updateQuantity(productId, change) {
     const product = cart.find((p) => p.product_id === productId);
     if (!product) return;
 
     const newQuantity = Math.max(1, product.quantity + change);
     try {
-        const response = await fetch('/api/cart/update', {  // fetch: Sends an asynchronous HTTP PUT request to update the quantity of a specific product in the cart on the server
+        const response = await fetch('/api/cart/update', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ product_id: productId, quantity: newQuantity })
         });
-        const data = await response.json();  // Awaits the JSON parsing of the server response after the fetch update
+        const data = await response.json();
         if (response.ok) {
             product.quantity = newQuantity;
             renderCart();
@@ -98,16 +96,15 @@ async function updateQuantity(productId, change) {  // async: Enables asynchrono
     }
 }
 
-// Remove item
-async function removeItem(productId) {  // async: Allows asynchronous removal of a cart item by making a server request
+async function removeItem(productId) {
     try {
-        const response = await fetch(`/api/cart/remove/${productId}`, {  // fetch: Performs an asynchronous HTTP DELETE request to remove a specific product from the cart on the server
+        const response = await fetch(`/api/cart/remove/${productId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();  // Awaits the JSON response from the server after the fetch deletion
+        const data = await response.json();
         if (response.ok) {
             cart = cart.filter((p) => p.product_id !== productId);
             renderCart();
@@ -120,16 +117,15 @@ async function removeItem(productId) {  // async: Allows asynchronous removal of
     }
 }
 
-// Clear cart
-async function clearCart() {  // async: Facilitates asynchronous clearing of the entire cart via a server request
+async function clearCart() {
     try {
-        const response = await fetch('/api/cart/clear', {  // fetch: Executes an asynchronous HTTP DELETE request to clear all items from the user's cart on the server
+        const response = await fetch('/api/cart/clear', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        const data = await response.json();  // Awaits the server's JSON response after the fetch clear operation
+        const data = await response.json();
         if (response.ok) {
             cart = [];
             renderCart();
@@ -142,7 +138,6 @@ async function clearCart() {  // async: Facilitates asynchronous clearing of the
     }
 }
 
-// Update total
 function updateTotal() {
     const cartTotal = document.getElementById("cart-total");
     if (!cartTotal) return;
@@ -160,7 +155,6 @@ function updateTotal() {
     cartTotal.textContent = total.toFixed(2);
 }
 
-// Show product details
 function showProductDetails(product) {
     const modal = document.getElementById("product-modal");
     if (!modal) return;
@@ -174,43 +168,11 @@ function showProductDetails(product) {
     modal.style.display = "block";
 }
 
-// Close modal
 function closeModal() {
     const modal = document.getElementById("product-modal");
     if (modal) modal.style.display = "none";
 }
 
-// Add to cart
-async function addToCart(product) {  // async: Supports asynchronous addition of a product to the cart by interacting with the server
-    try {
-        if (!product || !product.product_id) {
-            console.error('Invalid product data:', product);
-            alert('Failed to add product to cart: Invalid product data');
-            return;
-        }
-
-        const response = await fetch('/api/cart/add', {  // fetch: Initiates an asynchronous HTTP POST request to add a product to the user's cart on the server with the specified quantity
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ product_id: product.product_id, quantity: 1 })
-        });
-        const data = await response.json();  // Awaits the JSON response from the server after the fetch add operation
-        if (response.ok) {
-            await loadCart();  // Awaits reloading the cart after successful addition
-            alert(`${product.name} has been added to your cart!`);
-        } else {
-            console.error('Failed to add to cart:', data.message);
-            alert(data.message || 'Failed to add product to cart');
-        }
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-        alert('Failed to add product to cart: Network or server error');
-    }
-}
-
-// Checkout form toggle
 function toggleCheckoutForm() {
     const checkoutForm = document.getElementById("checkout-form");
     if (!checkoutForm) return;
@@ -220,18 +182,15 @@ function toggleCheckoutForm() {
         return;
     }
 
-    // Clear previous error messages
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
     checkoutForm.style.display = checkoutForm.style.display === "none" ? "block" : "none";
 }
 
-// Validate checkout form
 function validateForm(customerName, address, phoneNumber, email, paymentMethod) {
     let isValid = true;
     const phoneRegex = /^\d{10}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Clear previous error messages
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
 
     if (!customerName.trim()) {
@@ -262,8 +221,7 @@ function validateForm(customerName, address, phoneNumber, email, paymentMethod) 
     return isValid;
 }
 
-// Submit order
-async function submitOrder() {  // async: Handles asynchronous submission of the order to the server, including cart items and customer details
+async function submitOrder() {
     const customerName = document.getElementById("customer-name").value.trim();
     const address = document.getElementById("address").value.trim();
     const phoneNumber = document.getElementById("phone-number").value.trim();
@@ -276,7 +234,7 @@ async function submitOrder() {  // async: Handles asynchronous submission of the
     }
 
     try {
-        const response = await fetch('/api/delivery/create-order', {  // fetch: Sends an asynchronous HTTP POST request to create a new order on the server with customer info, payment details, and cart items
+        const response = await fetch('/api/delivery/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -291,7 +249,7 @@ async function submitOrder() {  // async: Handles asynchronous submission of the
                 items: cart
             })
         });
-        const data = await response.json();  // Awaits the JSON response from the server after order creation
+        const data = await response.json();
         if (response.ok) {
             alert(`Order placed successfully! Order ID: ${data.orderId}`);
             cart = [];
@@ -312,7 +270,6 @@ async function submitOrder() {  // async: Handles asynchronous submission of the
     }
 }
 
-// Event listeners
 document.addEventListener("DOMContentLoaded", () => {
     loadCart();
 
@@ -338,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("address").value = "";
             document.getElementById("phone-number").value = "";
             document.getElementById("email").value = "";
-            document.getElementById("payment=TMethod").value = "";
+            document.getElementById("payment-method").value = "";
             document.getElementById("comments").value = "";
             document.querySelectorAll('.error').forEach(error => error.textContent = '');
             toggleCheckoutForm();
