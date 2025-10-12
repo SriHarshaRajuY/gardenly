@@ -1,4 +1,4 @@
-// ✅ Global Execution Context (GEC) is created when this script starts running.
+//  Global Execution Context (GEC) is created when this script starts running.
 //    - Variables and functions are hoisted.
 //    - Then line-by-line execution begins.
 
