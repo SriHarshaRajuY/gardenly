@@ -1,4 +1,4 @@
-// Wait until the DOM is fully loaded
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // Map all the main sections for easy access
