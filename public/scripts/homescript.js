@@ -1,35 +1,39 @@
-
-// Home Slider
+// -------------------- HOME SLIDER -------------------- //
+// Initialize Swiper slider for homepage banners
 var swiper = new Swiper(".home-slider", {
-    spaceBetween: 30,
-    centeredSlides: true,
+    spaceBetween: 30,           // Space between slides in px
+    centeredSlides: true,       // Center active slide
     autoplay: {
-        delay: 5000,
-        disableOnInteraction: false,
+        delay: 5000,            // Slide changes every 5 seconds
+        disableOnInteraction: false, // Continue autoplay after user interaction
     },
     pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
+        el: ".swiper-pagination", // Pagination bullets
+        clickable: true,          // Allow clicking on bullets to navigate
     },
     navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
+        nextEl: ".swiper-button-next", // Next button
+        prevEl: ".swiper-button-prev", // Previous button
     },
-    loop: true,
+    loop: true,                 // Loop slides infinitely
 });
 
-// Function to create star rating HTML
+// -------------------- STAR RATING -------------------- //
+// Generate star rating HTML using Font Awesome icons
 function createStarRating(rating) {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     let starsHTML = '';
 
+    // Full stars
     for (let i = 0; i < fullStars; i++) {
         starsHTML += '<i class="fas fa-star"></i>';
     }
+    // Half star
     if (hasHalfStar) {
         starsHTML += '<i class="fa-solid fa-star-half-stroke"></i>';
     }
+    // Empty stars
     for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
         starsHTML += '<i class="far fa-star"></i>';
     }
@@ -37,7 +41,7 @@ function createStarRating(rating) {
     return starsHTML;
 }
 
-// Helper function to create star rating for product detail
+// Generate SVG-based star rating (for product detail view)
 function createStarRatingSVG(rating) {
     return Array(5).fill('').map((_, index) => {
         let fill = 'none';
@@ -63,11 +67,12 @@ function createStarRatingSVG(rating) {
     }).join('');
 }
 
-// Check if user is logged in
+// -------------------- AUTHENTICATION -------------------- //
+// Check if user is logged in (returns boolean)
 async function isLoggedIn() {
     try {
         const response = await fetch('/api/check-auth', {
-            credentials: 'include'
+            credentials: 'include' // Send cookies for session check
         });
         const data = await response.json();
         return data.isAuthenticated;
@@ -77,7 +82,8 @@ async function isLoggedIn() {
     }
 }
 
-// Show product detail
+// -------------------- PRODUCT DETAIL -------------------- //
+// Show detailed product info with quantity selector and dynamic price
 function showProductDetail(productId) {
     const productElement = document.querySelector(`.product .box[data-product-id="${productId}"]`);
     if (!productElement) {
@@ -85,6 +91,7 @@ function showProductDetail(productId) {
         return;
     }
 
+    // Get product info from DOM
     const product = {
         id: productId,
         name: productElement.querySelector('h3').textContent,
@@ -100,6 +107,7 @@ function showProductDetail(productId) {
     const productDetail = document.getElementById('product-detail');
     const detailContent = productDetail.querySelector('.detail-content');
 
+    // Populate product detail view
     detailContent.innerHTML = `
         <div>
             <img src="${product.image}" alt="${product.name}">
@@ -116,9 +124,7 @@ function showProductDetail(productId) {
                 ${product.inStock ? 'Add to Cart' : 'Sold Out'}
             </button>
             ${product.inStock ? `
-                <button class="buy-now">
-                    Buy Now
-                </button>
+                <button class="buy-now">Buy Now</button>
                 <div class="quantity">
                     <button class="decrement">-</button>
                     <span class="quantity-value">1</span>
@@ -127,6 +133,7 @@ function showProductDetail(productId) {
         </div>
     `;
 
+    // Handle quantity selector and price updates
     if (product.inStock) {
         const decrementBtn = detailContent.querySelector('.decrement');
         const incrementBtn = detailContent.querySelector('.increment');
@@ -156,15 +163,17 @@ function showProductDetail(productId) {
             }
         });
 
+        // Add to cart functionality
         addToCartBtn.addEventListener('click', async () => {
             await handleAddToCart(productId, quantity);
         });
     }
 
-    productDetail.classList.add('active');
+    productDetail.classList.add('active'); // Show product detail modal
 }
 
-// Handle product actions
+// -------------------- PRODUCT ACTIONS -------------------- //
+// Handle clicks on favorite, share, view, or cart icons
 function handleProductAction(action, productId) {
     switch (action) {
         case 'favorite':
@@ -184,11 +193,12 @@ function handleProductAction(action, productId) {
     }
 }
 
-// Handle add to cart with login check
+// -------------------- ADD TO CART -------------------- //
+// Add product to cart after login and stock validation
 async function handleAddToCart(productId, quantity) {
     const loggedIn = await isLoggedIn();
     if (!loggedIn) {
-        window.location.href = '/login';
+        window.location.href = '/login'; // Redirect to login if not authenticated
         return;
     }
 
@@ -223,13 +233,12 @@ async function handleAddToCart(productId, quantity) {
     try {
         const response = await fetch('/api/cart/add', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ product_id: product.id, quantity })
         });
         const data = await response.json();
         if (response.ok) {
+            // Show temporary "Added" status on button
             const addToCartBtn = document.querySelector(`[data-product-id="${productId}"] .add-to-cart-btn`) || 
                                 document.querySelector('#product-detail .add-to-cart-btn');
             if (addToCartBtn) {
@@ -250,68 +259,4 @@ async function handleAddToCart(productId, quantity) {
     }
 }
 
-// Initialize products and add event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.box').forEach(box => {
-        const productId = box.getAttribute('data-product-id');
-        box.dataset.category = box.dataset.category || 'General';
-
-        const quantityInput = box.querySelector('input[type="number"]');
-        if (quantityInput) {
-            quantityInput.addEventListener('change', (e) => {
-                const max = parseInt(e.target.max);
-                const value = parseInt(e.target.value);
-                if (value < 1) e.target.value = '1';
-                if (value > max) e.target.value = max.toString();
-            });
-        }
-
-        box.querySelectorAll('.icons a, .icons i').forEach(icon => {
-            icon.addEventListener('click', (e) => {
-                e.preventDefault();
-                const action = e.target.classList.contains('fa-heart') ? 'favorite' :
-                              e.target.classList.contains('fa-share') ? 'share' :
-                              e.target.classList.contains('fa-eye') ? 'view' :
-                              e.target.classList.contains('fa-shopping-cart') ? 'cart' : null;
-                
-                if (action) {
-                    const productId = box.getAttribute('data-product-id');
-                    handleProductAction(action, productId);
-                }
-            });
-        });
-
-        const addToCartBtn = box.querySelector('.add-to-cart-btn');
-        if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const productId = box.getAttribute('data-product-id');
-                const quantity = parseInt(box.querySelector('input[type="number"]')?.value || '1');
-                await handleAddToCart(productId, quantity);
-            });
-        }
-
-        box.addEventListener('click', (e) => {
-            if (!e.target.closest('.icons') && !e.target.closest('.add-to-cart-btn')) {
-                const productId = box.getAttribute('data-product-id');
-                showProductDetail(productId);
-            }
-        });
-    });
-
-    const backBtn = document.querySelector('.back-btn');
-    const productDetail = document.getElementById('product-detail');
-    if (backBtn && productDetail) {
-        backBtn.addEventListener('click', () => {
-            productDetail.classList.remove('active');
-        });
-    }
-
-    if (productDetail) {
-        productDetail.addEventListener('click', (e) => {
-            if (e.target === productDetail) {
-                productDetail.classList.remove('active');
-            }
-        });
-    }
-});
+// -------------------- INITIALIZATION ----------------
