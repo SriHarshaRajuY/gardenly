@@ -1,6 +1,6 @@
 let cart = [];
 
-// Load cart from server
+// Load cart data from the server
 async function loadCart() {
     try {
         const response = await fetch('/api/cart', {
@@ -11,12 +11,13 @@ async function loadCart() {
         });
         const data = await response.json();
         if (response.ok) {
+            // If response is successful, assign the cart items
             cart = data.items || [];
         } else {
             console.error('Failed to load cart:', data.message);
             cart = [];
         }
-        renderCart();
+        renderCart(); // Render the cart UI
     } catch (error) {
         console.error('Error loading cart:', error);
         cart = [];
@@ -24,13 +25,14 @@ async function loadCart() {
     }
 }
 
-// Render cart items
+// Render cart items on the page
 function renderCart() {
     const cartItems = document.getElementById("cart-items");
     if (!cartItems) return;
 
     cartItems.innerHTML = "";
 
+    // Show empty cart message if no items
     if (cart.length === 0) {
         cartItems.innerHTML = `
             <div class="empty-cart">
@@ -43,11 +45,13 @@ function renderCart() {
         return;
     }
 
+    // Display each product in the cart
     cart.forEach((product) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "cart-item";
-        itemDiv.onclick = () => showProductDetails(product);
+        itemDiv.onclick = () => showProductDetails(product); // Click shows product details
 
+        // Create cart item layout
         itemDiv.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
             <div class="item-details">
@@ -67,15 +71,15 @@ function renderCart() {
         cartItems.appendChild(itemDiv);
     });
 
-    updateTotal();
+    updateTotal(); // Update the total price
 }
 
-// Update quantity
+// Update quantity of a cart item
 async function updateQuantity(productId, change) {
     const product = cart.find((p) => p.product_id === productId);
     if (!product) return;
 
-    const newQuantity = Math.max(1, product.quantity + change);
+    const newQuantity = Math.max(1, product.quantity + change); // Minimum quantity = 1
     try {
         const response = await fetch('/api/cart/update', {
             method: 'PUT',
@@ -87,7 +91,7 @@ async function updateQuantity(productId, change) {
         const data = await response.json();
         if (response.ok) {
             product.quantity = newQuantity;
-            renderCart();
+            renderCart(); // Re-render cart
         } else {
             alert(data.message || 'Failed to update quantity');
         }
@@ -97,7 +101,7 @@ async function updateQuantity(productId, change) {
     }
 }
 
-// Remove item
+// Remove an item from the cart
 async function removeItem(productId) {
     try {
         const response = await fetch(`/api/cart/remove/${productId}`, {
@@ -108,7 +112,7 @@ async function removeItem(productId) {
         });
         const data = await response.json();
         if (response.ok) {
-            cart = cart.filter((p) => p.product_id !== productId);
+            cart = cart.filter((p) => p.product_id !== productId); // Remove locally
             renderCart();
         } else {
             alert(data.message || 'Failed to remove item');
@@ -119,7 +123,7 @@ async function removeItem(productId) {
     }
 }
 
-// Clear cart
+// Clear the entire cart
 async function clearCart() {
     try {
         const response = await fetch('/api/cart/clear', {
@@ -130,7 +134,7 @@ async function clearCart() {
         });
         const data = await response.json();
         if (response.ok) {
-            cart = [];
+            cart = []; // Empty cart
             renderCart();
         } else {
             alert(data.message || 'Failed to clear cart');
@@ -141,11 +145,12 @@ async function clearCart() {
     }
 }
 
-// Update total
+// Update total price of cart
 function updateTotal() {
     const cartTotal = document.getElementById("cart-total");
     if (!cartTotal) return;
 
+    // Calculate total
     const total = cart.reduce((sum, product) => {
         const price = parseFloat(product.price);
         const quantity = parseInt(product.quantity) || 1;
@@ -159,27 +164,28 @@ function updateTotal() {
     cartTotal.textContent = total.toFixed(2);
 }
 
-// Show product details
+// Show product details in modal
 function showProductDetails(product) {
     const modal = document.getElementById("product-modal");
     if (!modal) return;
 
+    // Fill modal with product info
     document.getElementById("modal-title").textContent = product.name;
     document.getElementById("modal-image").src = product.image;
     document.getElementById("modal-description").textContent = product.description || "No description available";
     document.getElementById("modal-price").textContent = product.price.toFixed(2);
     document.getElementById("modal-rating").textContent = product.rating || "N/A";
     document.getElementById("modal-category").textContent = product.category || "N/A";
-    modal.style.display = "block";
+    modal.style.display = "block"; // Show modal
 }
 
-// Close modal
+// Close product details modal
 function closeModal() {
     const modal = document.getElementById("product-modal");
     if (modal) modal.style.display = "none";
 }
 
-// Add to cart
+// Add a product to cart
 async function addToCart(product) {
     try {
         if (!product || !product.product_id) {
@@ -197,7 +203,7 @@ async function addToCart(product) {
         });
         const data = await response.json();
         if (response.ok) {
-            await loadCart();
+            await loadCart(); // Reload updated cart
             alert(`${product.name} has been added to your cart!`);
         } else {
             console.error('Failed to add to cart:', data.message);
@@ -209,7 +215,7 @@ async function addToCart(product) {
     }
 }
 
-// Checkout form toggle
+// Toggle visibility of checkout form
 function toggleCheckoutForm() {
     const checkoutForm = document.getElementById("checkout-form");
     if (!checkoutForm) return;
@@ -219,12 +225,12 @@ function toggleCheckoutForm() {
         return;
     }
 
-    // Clear previous error messages
+    // Clear previous validation errors
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
     checkoutForm.style.display = checkoutForm.style.display === "none" ? "block" : "none";
 }
 
-// Validate checkout form
+// Validate checkout form input fields
 function validateForm(customerName, address, phoneNumber, email, paymentMethod) {
     let isValid = true;
     const phoneRegex = /^\d{10}$/;
@@ -233,6 +239,7 @@ function validateForm(customerName, address, phoneNumber, email, paymentMethod) 
     // Clear previous error messages
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
 
+    // Validate each field
     if (!customerName.trim()) {
         document.getElementById('customer-name-error').textContent = 'Full name is required';
         isValid = false;
@@ -261,7 +268,7 @@ function validateForm(customerName, address, phoneNumber, email, paymentMethod) 
     return isValid;
 }
 
-// Submit order
+// Submit order details to the server
 async function submitOrder() {
     const customerName = document.getElementById("customer-name").value.trim();
     const address = document.getElementById("address").value.trim();
@@ -270,6 +277,7 @@ async function submitOrder() {
     const paymentMethod = document.getElementById("payment-method").value;
     const comments = document.getElementById("comments").value.trim();
 
+    // Validate before submission
     if (!validateForm(customerName, address, phoneNumber, email, paymentMethod)) {
         return;
     }
@@ -293,9 +301,11 @@ async function submitOrder() {
         const data = await response.json();
         if (response.ok) {
             alert(`Order placed successfully! Order ID: ${data.orderId}`);
-            cart = [];
+            cart = []; // Clear cart after successful order
             renderCart();
             toggleCheckoutForm();
+
+            // Reset form fields
             document.getElementById("customer-name").value = "";
             document.getElementById("address").value = "";
             document.getElementById("phone-number").value = "";
@@ -311,9 +321,9 @@ async function submitOrder() {
     }
 }
 
-// Event listeners
+// Event listeners when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-    loadCart();
+    loadCart(); // Load cart items immediately
 
     const clearCartBtn = document.getElementById("clear-cart-btn");
     if (clearCartBtn) {
@@ -333,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelCheckoutBtn = document.getElementById("cancel-checkout-btn");
     if (cancelCheckoutBtn) {
         cancelCheckoutBtn.addEventListener("click", () => {
+            // Reset all input fields
             document.getElementById("customer-name").value = "";
             document.getElementById("address").value = "";
             document.getElementById("phone-number").value = "";
@@ -340,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("payment=TMethod").value = "";
             document.getElementById("comments").value = "";
             document.querySelectorAll('.error').forEach(error => error.textContent = '');
-            toggleCheckoutForm();
+            toggleCheckoutForm(); // Hide the checkout form
         });
     }
 });
