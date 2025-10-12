@@ -1,4 +1,6 @@
+// Wait for the entire DOM content to load before executing the script
 document.addEventListener("DOMContentLoaded", () => {
+    // Get references to all necessary DOM elements
     const productForm = document.getElementById("seller-product-form");
     const topSales = document.getElementById("seller-top-sales");
     const recentSales = document.getElementById("seller-recent-sales");
@@ -12,48 +14,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalDescription = document.getElementById("seller-modal-description");
     const closeBtn = document.querySelector(".seller-close");
 
-    let products = [];
-    let isSubmitting = false;
+    let products = [];         // Array to store all products
+    let isSubmitting = false;  // Flag to prevent multiple form submissions
 
-    // Function to fetch top sales from server
+    // ------------------- FETCHING DATA FROM SERVER -------------------
+
+    // Fetch top-selling products
     async function fetchTopSales() {
         try {
-            // Fetch request to the '/api/top-sales' endpoint to get top-selling products
-            const response = await fetch('/api/top-sales');
-
-            // Check if response status is OK (status code 200-299)
+            const response = await fetch('/api/top-sales'); // GET top sales data
             if (!response.ok) throw new Error('Failed to fetch top sales');
-
-            // Parse the response body as JSON and return it
-            return await response.json();
+            return await response.json(); // Parse response as JSON
         } catch (error) {
             console.error('Error loading top sales:', error);
             return [];
         }
     }
 
-    // Function to fetch recent sales from server
+    // Fetch recently sold products
     async function fetchRecentSales() {
         try {
-            // Fetch request to the '/api/recent-sales' endpoint to get recently sold products
-            const response = await fetch('/api/recent-sales');
-
-            // If server responds with an error status, throw an error
+            const response = await fetch('/api/recent-sales'); // GET recent sales data
             if (!response.ok) throw new Error('Failed to fetch recent sales');
-
-            // Convert the response to JSON
-            return await response.json();
+            return await response.json(); // Parse response as JSON
         } catch (error) {
             console.error('Error loading recent sales:', error);
             return [];
         }
     }
 
-    // Function to create a product card
+    // ------------------- PRODUCT CARD CREATION -------------------
+
+    // Create a product card element dynamically
     function createProductCard(product) {
         const productDiv = document.createElement("div");
         productDiv.className = "product-card";
         productDiv.setAttribute('data-product-id', product.id);
+
+        // Card HTML structure
         productDiv.innerHTML = `
             <img src="${product.image}" alt="${product.name}">
             <h3>${product.name}</h3>
@@ -65,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="seller-delete-btn">Delete</button>
         `;
 
-        // Add event listeners for the buttons
+        // Attach event listeners to each button
         productDiv.querySelector(".view-details-btn").addEventListener("click", () => showProductDetails(product));
         productDiv.querySelector(".seller-edit-btn").addEventListener("click", () => editProduct(product));
         productDiv.querySelector(".seller-delete-btn").addEventListener("click", () => deleteProduct(product));
@@ -73,7 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return productDiv;
     }
 
-    // Function to show product details
+    // ------------------- PRODUCT MODAL HANDLING -------------------
+
+    // Show product details in a modal
     function showProductDetails(product) {
         modalImg.src = product.image;
         modalTitle.textContent = product.name;
@@ -82,18 +82,21 @@ document.addEventListener("DOMContentLoaded", () => {
         modalSold.textContent = `Sold: ${product.sold}`;
         modalDescription.textContent = product.description || "No description available";
         
-        productModal.classList.add('active');
-        overlay.classList.add('active');
+        productModal.classList.add('active'); // Display modal
+        overlay.classList.add('active');      // Show overlay background
     }
 
-    // Function to edit a product
+    // ------------------- EDIT PRODUCT -------------------
+
     async function editProduct(product) {
+        // Prompt user for new details
         const newName = prompt("Enter new product name:", product.name);
         const newDescription = prompt("Enter new description:", product.description || "");
         const newCategory = prompt("Enter new category:", product.category || "");
         const newPrice = prompt("Enter new price (e.g., 10.99):", product.price.replace('$', ''));
         const newQuantity = prompt("Enter new quantity:", product.quantity);
 
+        // Validate input
         if (newName && newDescription !== null && newCategory && newPrice && newQuantity) {
             const priceNum = parseFloat(newPrice);
             const quantityNum = parseInt(newQuantity);
@@ -107,10 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             try {
-                // Fetch request to update the product on server
+                // PUT request to update product details
                 const response = await fetch(`/api/products/${product.id}`, {
-                    method: 'PUT', // PUT request for updating existing product
-                    headers: { 'Content-Type': 'application/json' }, // Sending JSON body
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: newName,
                         description: newDescription,
@@ -120,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 });
 
-                // Convert response to text first (to handle non-JSON responses)
                 const rawResponse = await response.text();
                 console.log('Edit response:', rawResponse);
 
@@ -134,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(errorData.message || 'Failed to update product');
                 }
 
-                await renderProducts();
+                await renderProducts(); // Refresh products after update
                 alert('Product updated successfully!');
             } catch (error) {
                 console.error('Error updating product:', error);
@@ -145,15 +147,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Function to delete a product
+    // ------------------- DELETE PRODUCT -------------------
+
     async function deleteProduct(product) {
         if (confirm("Are you sure you want to delete this product?")) {
             try {
-                // Fetch request to delete product on server
-                const response = await fetch(`/api/products/${product.id}`, {
-                    method: 'DELETE' // DELETE request to remove the product
-                });
-
+                // DELETE request to remove product
+                const response = await fetch(`/api/products/${product.id}`, { method: 'DELETE' });
                 const rawResponse = await response.text();
                 console.log('Delete response:', rawResponse);
 
@@ -167,6 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(errorData.message || 'Failed to delete product');
                 }
 
+                // Update local product list and re-render
                 products = products.filter(p => p.id !== product.id);
                 await renderProducts();
                 alert('Product deleted successfully!');
@@ -177,56 +178,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Function to render all products
+    // ------------------- RENDER PRODUCTS -------------------
+
     async function renderProducts() {
-        // Clear top and recent sales
         topSales.innerHTML = "";
         recentSales.innerHTML = "";
 
         try {
-            // Fetch all seller products from server
-            const response = await fetch('/api/seller/products'); 
-            // GET request retrieves all products for the seller
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch products');
-            }
+            // GET all seller products
+            const response = await fetch('/api/seller/products');
+            if (!response.ok) throw new Error('Failed to fetch products');
             products = await response.json();
 
-            // Clear existing product lists within categories
+            // Clear old product sections
             document.querySelectorAll('.product-list').forEach(list => list.innerHTML = "");
 
             // Group products by category
             const productsByCategory = products.reduce((acc, product) => {
                 const category = product.category || 'Uncategorized';
-                if (!acc[category]) {
-                    acc[category] = [];
-                }
+                if (!acc[category]) acc[category] = [];
                 acc[category].push(product);
                 return acc;
             }, {});
 
-            // Get the seller products container
             const sellerProducts = document.querySelector('.seller-products');
 
-            // Ensure the "Your Products" heading exists
+            // Ensure heading exists
             if (!sellerProducts.querySelector('h2')) {
                 sellerProducts.innerHTML = '<h2>Your Products</h2>';
             }
 
-            // Handle empty state
+            // Display empty state if no products
             if (Object.keys(productsByCategory).length === 0) {
                 const emptyMessage = document.createElement('p');
                 emptyMessage.textContent = 'No products found. Add a product to get started!';
                 sellerProducts.appendChild(emptyMessage);
             } else {
-                // Remove empty state message if it exists
                 const emptyMessage = sellerProducts.querySelector('p');
-                if (emptyMessage) {
-                    emptyMessage.remove();
-                }
+                if (emptyMessage) emptyMessage.remove();
 
-                // Render products for each category
+                // Render each category and its products
                 Object.keys(productsByCategory).forEach(category => {
                     const categoryId = category.toLowerCase().replace(/\s+/g, '-');
                     let categorySection = Array.from(document.querySelectorAll('.category-section h3'))
@@ -250,26 +241,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            // Render top sales
-            const topProducts = await fetchTopSales(); // GET request to retrieve top-selling products
-            topProducts.forEach(product => {
-                const productCard = createProductCard(product);
-                topSales.appendChild(productCard);
-            });
+            // Render top and recent sales sections
+            const topProducts = await fetchTopSales();
+            topProducts.forEach(product => topSales.appendChild(createProductCard(product)));
 
-            // Render recent sales
-            const recentProducts = await fetchRecentSales(); // GET request to retrieve recent sales
-            recentProducts.forEach(product => {
-                const productCard = createProductCard(product);
-                recentSales.appendChild(productCard);
-            });
+            const recentProducts = await fetchRecentSales();
+            recentProducts.forEach(product => recentSales.appendChild(createProductCard(product)));
         } catch (error) {
             console.error('Error rendering products:', error);
             alert('Failed to load products. Please refresh the page.');
         }
     }
 
-    // Function to compress image
+    // ------------------- IMAGE COMPRESSION -------------------
+
     async function compressImage(file, maxWidth = 800, quality = 0.7) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -285,19 +270,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
-                    resolve(canvas.toDataURL('image/jpeg', quality));
+                    resolve(canvas.toDataURL('image/jpeg', quality)); // Return compressed image
                 };
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // Form submission handler
+    // ------------------- PRODUCT FORM SUBMISSION -------------------
+
     productForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (isSubmitting) return;
+        if (isSubmitting) return; // Prevent double submission
         isSubmitting = true;
 
+        // Extract values from form fields
         const name = document.getElementById('seller-product-name').value.trim();
         const description = document.getElementById('seller-product-description').value.trim();
         const category = document.getElementById('seller-product-category').value.trim();
@@ -305,44 +292,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const quantity = document.getElementById('seller-product-quantity').value;
         const imageFile = document.getElementById('seller-product-image').files[0];
 
-        if (!name) {
-            alert('Please enter a product name');
-            isSubmitting = false;
-            return;
-        }
-
-        if (!imageFile) {
-            alert('Please select a product image');
-            isSubmitting = false;
-            return;
-        }
-
-        if (imageFile.size > 5 * 1024 * 1024) {
-            alert('Image file size exceeds 5MB. Please select a smaller image.');
-            isSubmitting = false;
-            return;
-        }
-
-        if (!category) {
-            alert('Please enter a category');
-            isSubmitting = false;
-            return;
-        }
+        // Input validations
+        if (!name) { alert('Please enter a product name'); isSubmitting = false; return; }
+        if (!imageFile) { alert('Please select a product image'); isSubmitting = false; return; }
+        if (imageFile.size > 5 * 1024 * 1024) { alert('Image file too large'); isSubmitting = false; return; }
+        if (!category) { alert('Please enter a category'); isSubmitting = false; return; }
 
         const priceNum = parseFloat(price);
         const quantityNum = parseInt(quantity);
-        if (!price || isNaN(priceNum) || priceNum <= 0) {
-            alert('Please enter a valid positive price');
-            isSubmitting = false;
-            return;
-        }
-        if (!quantity || isNaN(quantityNum) || quantityNum <= 0) {
-            alert('Please enter a valid positive quantity');
-            isSubmitting = false;
-            return;
-        }
+        if (!price || isNaN(priceNum) || priceNum <= 0) { alert('Invalid price'); isSubmitting = false; return; }
+        if (!quantity || isNaN(quantityNum) || quantityNum <= 0) { alert('Invalid quantity'); isSubmitting = false; return; }
 
-        // Compress the image
+        // Compress product image before uploading
         let compressedImage;
         try {
             compressedImage = await compressImage(imageFile);
@@ -353,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Create FormData object
+        // Prepare form data for server
         const formData = new FormData();
         formData.append('name', name);
         formData.append('description', description);
@@ -361,15 +322,15 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append('price', priceNum);
         formData.append('quantity', quantityNum);
 
-        // Convert compressed image DataURL to Blob using fetch
+        // Convert DataURL to Blob for upload
         const blob = await fetch(compressedImage).then(res => res.blob());
         formData.append('image', blob, imageFile.name);
 
         try {
-            // POST request to add a new product on server
+            // POST new product to server
             const response = await fetch('/addproduct', {
                 method: 'POST',
-                body: formData   // FormData includes product details and image Blob
+                body: formData
             });
 
             const result = await response.json();
@@ -390,7 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Event listeners
+    // ------------------- EVENT LISTENERS FOR MODAL -------------------
+
     closeBtn.addEventListener("click", () => {
         productModal.classList.remove('active');
         overlay.classList.remove('active');
@@ -401,6 +363,6 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.classList.remove('active');
     });
 
-    // Initial render
+    // Initial page load — fetch and render all products
     renderProducts();
 });
