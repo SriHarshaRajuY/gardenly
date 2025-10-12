@@ -1,3 +1,4 @@
+
 // Wait for the entire DOM content to load before executing the script
 document.addEventListener("DOMContentLoaded", () => {
     // Get references to all necessary DOM elements
