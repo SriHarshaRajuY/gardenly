@@ -1,6 +1,8 @@
+// Import required modules
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// Connect to MongoDB with specified options
 mongoose.connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 30000,
     bufferCommands: false
@@ -13,7 +15,7 @@ mongoose.connect(process.env.MONGO_URI, {
     process.exit(1);
 });
 
-// User Schema
+// Define User Schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -23,7 +25,7 @@ const userSchema = new mongoose.Schema({
     mobile: { type: String, required: true, unique: true }
 });
 
-// Product Schema
+// Define Product Schema
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
@@ -37,7 +39,7 @@ const productSchema = new mongoose.Schema({
     sold_at: { type: Date }
 });
 
-// Ticket Schema - FIXED: Added resolved_at field
+// Define Ticket Schema - FIXED: Added resolved_at field
 const ticketSchema = new mongoose.Schema({
     requester: { type: String, required: true },
     subject: { type: String, required: true },
@@ -51,7 +53,7 @@ const ticketSchema = new mongoose.Schema({
     resolved_at: { type: Date } // FIXED: Added resolution timestamp
 });
 
-// Order Schema
+// Define Order Schema
 const orderSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     items: [{
@@ -70,7 +72,7 @@ const orderSchema = new mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 });
 
-// Cart Schema
+// Define Cart Schema
 const cartSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     items: [{
@@ -84,14 +86,14 @@ const cartSchema = new mongoose.Schema({
     updated_at: { type: Date, default: Date.now }
 });
 
-// Create models
+// Create Mongoose models from schemas
 const User = mongoose.model('User', userSchema);
 const Product = mongoose.model('Product', productSchema);
 const Ticket = mongoose.model('Ticket', ticketSchema);
 const Order = mongoose.model('Order', orderSchema);
 const Cart = mongoose.model('Cart', cartSchema);
 
-// Default users data
+// Default users data for initialization
 const defaultUsers = [
     { username: 'admin', password: 'admin123', role: 'Admin', expertise: null, email: 'admin@example.com', mobile: '1234567890' },
     { username: 'seller1', password: 'seller123', role: 'Seller', expertise: null, email: 'seller1@example.com', mobile: '2345678901' },
@@ -107,7 +109,7 @@ const defaultUsers = [
     { username: 'expert3', password: 'expert789', role: 'Expert', expertise: 'Billing', email: 'expert3@example.com', mobile: '2345098761' }
 ];
 
-// Default products data - COMPLETE LIST
+// Default products data for initialization - COMPLETE LIST
 const defaultProducts = [
     { 
         name: 'Peace Lily, Spathiphyllum - Plant', 
@@ -363,16 +365,16 @@ const defaultProducts = [
     }
 ];
 
-// Initialize database with default data
+// Asynchronous function to initialize the database with default data
 async function initializeDatabase() {
     try {
         console.log('Starting database initialization...');
 
-        // Wait for the connection to be established
+        // Wait for MongoDB connection
         await mongoose.connection.asPromise();
         console.log('MongoDB connection established');
 
-        // Clear existing collections
+        // Clear existing users collection
         console.log('Clearing users collection...');
         await User.deleteMany({}).catch(err => {
             console.error('Error clearing users collection:', err.message);
@@ -380,6 +382,7 @@ async function initializeDatabase() {
         });
         console.log('Cleared users collection');
 
+        // Clear existing products collection
         console.log('Clearing products collection...');
         await Product.deleteMany({}).catch(err => {
             console.error('Error clearing products collection:', err.message);
@@ -387,6 +390,7 @@ async function initializeDatabase() {
         });
         console.log('Cleared products collection');
 
+        // Clear existing tickets collection
         console.log('Clearing tickets collection...');
         await Ticket.deleteMany({}).catch(err => {
             console.error('Error clearing tickets collection:', err.message);
@@ -394,6 +398,7 @@ async function initializeDatabase() {
         });
         console.log('Cleared tickets collection');
 
+        // Clear existing orders collection
         console.log('Clearing orders collection...');
         await Order.deleteMany({}).catch(err => {
             console.error('Error clearing orders collection:', err.message);
@@ -401,6 +406,7 @@ async function initializeDatabase() {
         });
         console.log('Cleared orders collection');
 
+        // Clear existing carts collection
         console.log('Clearing carts collection...');
         await Cart.deleteMany({}).catch(err => {
             console.error('Error clearing carts collection:', err.message);
@@ -416,7 +422,7 @@ async function initializeDatabase() {
         });
         console.log('Default users inserted:', users.length);
 
-        // Update seller_id in default products
+        // Find default seller and update products with seller_id
         const seller = users.find(u => u.username === 'seller1');
         if (!seller) {
             throw new Error('Default seller not found');
@@ -444,6 +450,7 @@ async function initializeDatabase() {
     }
 }
 
+// Export models and initialization function
 module.exports = {
     User,
     Product,
