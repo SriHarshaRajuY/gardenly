@@ -1,4 +1,4 @@
-// Wait for the DOM to fully load before executing the script
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // Map section IDs to variables for easy access
