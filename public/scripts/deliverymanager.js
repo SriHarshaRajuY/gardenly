@@ -1,7 +1,7 @@
 // Wait for the DOM to fully load before running the script
 document.addEventListener('DOMContentLoaded', function () {
 
-    
+    // Sample delivery data array with initial status values
     let deliveries = [
         { id: 1, orderId: 'ORD123', customer: 'John Doe', address: '123 Main St', status: 'Pending' },
         { id: 2, orderId: 'ORD124', customer: 'Jane Smith', address: '456 Elm St', status: 'Pending' },
