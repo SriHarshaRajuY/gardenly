@@ -75,3 +75,24 @@ Dynamic Rendering: EJS templates render real-time data for sellers and buyers.
 
 API Integration: RESTful APIs for CRUD operations across products, users, and orders.
 
+
+Demo Video: [Add your Google Drive or YouTube link here]
+Timestamps:
+
+00:00 – Overview
+
+00:45 – Registration & Login
+
+01:30 – Buyer Dashboard
+
+02:10 – Cart & Payment
+
+03:00 – Admin Dashboard
+
+
+
+.
+
+🌱 Conclusion
+
+Gardenly is more than an e-commerce store—it’s a platform for sustainable green living. With its user-friendly design, expert support, and eco-conscious product range, Gardenly inspires everyone to bring nature closer to home.
