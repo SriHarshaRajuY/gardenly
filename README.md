@@ -91,8 +91,25 @@ Timestamps:
 
 .
 Network Evidence 
+
+
 seeds-aysnc
 ![seeds-await](https://github.com/user-attachments/assets/1cc7ac57-8b28-4c96-a22d-7136dc183d90)
+
+seller-asyncawait
+![seller-asyncawait](https://github.com/user-attachments/assets/794843db-5da9-42e4-b8c6-221921acb4b6)
+
+register-postawait
+![register-postawait](https://github.com/user-attachments/assets/bf5a14b6-0613-44d3-99bd-2cb9b1f825de)
+
+plants-asyncawait
+![plants-asyncawait](https://github.com/user-attachments/assets/55480746-3e04-40ea-ad2d-03e714ae6424)
+
+login-postawait
+![login-postawait](https://github.com/user-attachments/assets/fb3f67d1-a156-4c1e-b87f-a819cad48370)
+
+home-aysncawai
+![home-aysncawait](https://github.com/user-attachments/assets/089d830a-03d9-43f1-98e4-88a0925e391e)
 
 
 
