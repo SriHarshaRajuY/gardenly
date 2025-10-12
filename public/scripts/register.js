@@ -1,7 +1,9 @@
+
 const inputs = document.querySelectorAll(".input");
 const form = document.querySelector("#register-form");
 const passwordInput = document.querySelector("#password");
-const errorMessage = document.querySelector("#error-message");
+const errorMessage = document.querySelector("#error-message"); // Ensure this exists in HTML: <div id="error-message" style="color: red;"></div>
+
 
 function addcl() {
     let parent = this.parentNode.parentNode;
@@ -15,11 +17,13 @@ function remcl() {
     }
 }
 
+// Add event listeners for focus and blur to all inputs
 inputs.forEach((input) => {
     input.addEventListener("focus", addcl);
     input.addEventListener("blur", remcl);
 });
 
+// Validation functions 
 function validateUsername(username) {
     return /^[a-zA-Z0-9_-]{3,20}$/.test(username);
 }
@@ -29,90 +33,136 @@ function validatePassword(password) {
 }
 
 function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.com$/.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // Updated to match server's emailRegex (allows any domain, not just .com)
 }
 
 function validateMobile(mobile) {
     return /^\d{10}$/.test(mobile);
 }
 
+
 inputs.forEach((input) => {
     input.addEventListener("input", function() {
-        const value = this.value;
+        const value = this.value.trim();
 
+        let errorText = "";
         switch (this.name) {
             case "username":
                 if (!validateUsername(value) && value !== "") {
-                    errorMessage.textContent = "Username: 3-20 chars (letters, numbers, _, - only)";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Username: 3-20 chars (letters, numbers, _, - only)";
                 }
                 break;
             case "password":
                 if (!validatePassword(value) && value !== "") {
-                    errorMessage.textContent = "Password: 8+ chars, 1 upper, 1 number, 1 symbol";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Password: 8+ chars, 1 upper, 1 number, 1 symbol";
                 }
                 break;
             case "email":
                 if (!validateEmail(value) && value !== "") {
-                    errorMessage.textContent = "Email must be valid and end with .com";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Invalid email format";
                 }
                 break;
             case "mobile":
                 if (!validateMobile(value) && value !== "") {
-                    errorMessage.textContent = "Mobile must be exactly 10 digits";
-                } else {
-                    errorMessage.textContent = "";
+                    errorText = "Mobile must be exactly 10 digits";
                 }
                 break;
+        }
+
+        // Dynamically update error message in DOM
+        if (errorMessage) {
+            errorMessage.textContent = errorText;
+            errorMessage.style.display = errorText ? 'block' : 'none';
         }
     });
 });
 
-form.addEventListener("submit", (e) => {
-    const username = form.querySelector("input[name='username']").value;
-    const password = passwordInput.value;
-    const email = form.querySelector("input[name='email']").value;
-    const mobile = form.querySelector("input[name='mobile']").value;
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent default form submission to handle asynchronously
+
+    
+    const username = form.querySelector("input[name='username']").value.trim();
+    const password = passwordInput.value.trim();
+    const email = form.querySelector("input[name='email']").value.trim();
+    const mobile = form.querySelector("input[name='mobile']").value.trim();
     const role = form.querySelector("select[name='role']").value;
 
+    // Client-side validation using DOM
+    let errorText = "";
     if (!validateUsername(username)) {
-        e.preventDefault();
-        errorMessage.textContent = "Invalid username format";
-        return;
+        errorText = "Invalid username format";
+    } else if (!validatePassword(password)) {
+        errorText = "Invalid password format";
+    } else if (!validateEmail(email)) {
+        errorText = "Invalid email format";
+    } else if (!validateMobile(mobile)) {
+        errorText = "Mobile number must be exactly 10 digits";
+    } else if (!role) {
+        errorText = "Please select a role";
     }
 
-    if (!validatePassword(password)) {
-        e.preventDefault();
-        errorMessage.textContent = "Invalid password format";
-        return;
+    // Dynamically show error if validation fails
+    if (errorText) {
+        if (errorMessage) {
+            errorMessage.textContent = errorText;
+            errorMessage.style.display = 'block';
+        } else {
+            alert(errorText); 
+        }
+        return; 
     }
 
-    if (!validateEmail(email)) {
-        e.preventDefault();
-        errorMessage.textContent = "Email must be valid and end with .com";
-        return;
+    // Clear error message if valid
+    if (errorMessage) {
+        errorMessage.textContent = "";
+        errorMessage.style.display = 'none';
     }
 
-    if (!validateMobile(mobile)) {
-        e.preventDefault();
-        errorMessage.textContent = "Mobile number must be exactly 10 digits";
-        return;
-    }
+    
+    const data = { username, password, role, email, mobile };
 
-    if (!role) {
-        e.preventDefault();
-        errorMessage.textContent = "Please select a role";
-        return;
+    try {
+        // Use fetch for asynchronous data handling to POST /register
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        
+        if (response.ok) {
+            
+            window.location.href = '/login';
+        } else {
+        
+            const errorData = await response.text(); 
+            if (errorMessage) {
+                errorMessage.textContent = errorData || 'Registration failed';
+                errorMessage.style.display = 'block';
+            } else {
+                alert(errorData || 'Registration failed');
+            }
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        if (errorMessage) {
+            errorMessage.textContent = 'Server error during registration';
+            errorMessage.style.display = 'block';
+        } else {
+            alert('Server error during registration');
+        }
     }
 });
 
+
 inputs.forEach(input => {
     input.addEventListener('focus', function() {
-        errorMessage.textContent = "";
+        if (errorMessage) {
+            errorMessage.textContent = "";
+            errorMessage.style.display = 'none';
+        }
     });
 });
