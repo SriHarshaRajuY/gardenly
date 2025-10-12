@@ -19,11 +19,11 @@ Our mission is to make green living accessible and convenient for everyone by of
 
 | Name | Roll No | Role & Contribution |
 |------|----------|---------------------|
-| **Y. Sri Harsha Raju Yellamraju** | S20230010269 | Led backend integration, developed REST APIs, handled MongoDB connectivity, built Admin Dashboard, Buyer Page, and Cart system. |
+| **Y. Sri Harsha Raju Yellamraju** | S20230010269 | Led backend integration, developed REST APIs, handled MongoDB connectivity, built Admin Dashboard, Buyer Page. |
 | **B. Pardhuva** | S20230010045 | Implemented backend controllers, business logic, Seller Page, Seller Dashboard, and Product schema. |
 | **M. Sai Teja** | S20230010136 | Developed Expert Support module, Expert Dashboard, and Tickets schema. |
-| **A. Abhyas** | S20230010009 | Designed and maintained Mongoose models, developed Login Page and User schema. |
-| **C. Sateesh Kumar Raju** | S20230010055 | Designed Blogs Page and Orders schema. |
+| **A. Abhyas** | S20230010009 |  developed Login Page , register page , User schema , developed palnts ,pots , fertilizers in home page . |
+| **C. Sateesh Kumar Raju** | S20230010055 | Designed Blogs Page  ,Orders schema , Cart system. |
 
 ---
 
