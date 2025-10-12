@@ -112,6 +112,12 @@ home-aysncawai
 ![home-aysncawait](https://github.com/user-attachments/assets/089d830a-03d9-43f1-98e4-88a0925e391e)
 
 
+commits:
+<img width="728" height="761" alt="Screenshot 2025-10-12 221644" src="https://github.com/user-attachments/assets/c9b894e1-75cd-41c1-b218-1c4b776fc22e" />
+<img width="670" height="858" alt="Screenshot 2025-10-12 221440" src="https://github.com/user-attachments/assets/4c2474ce-8506-46a6-9783-5ff2a685acc4" />
+<img width="720" height="689" alt="Screenshot 2025-10-12 221717" src="https://github.com/user-attachments/assets/2b1053ab-5b84-4feb-a57c-5fc874437fd7" />
+<img width="1055" height="706" alt="Screenshot 2025-10-12 221807" src="https://github.com/user-attachments/assets/13afd838-f9f0-4406-a27f-3c40521aaed3" />
+<img width="1025" height="442" alt="Screenshot 2025-10-12 221825" src="https://github.com/user-attachments/assets/248e9f15-2375-4ee6-a186-d6b85592622b" />
 
 
 🌱 Conclusion
