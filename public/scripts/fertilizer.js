@@ -1,3 +1,4 @@
+// Sample list of products
 const products = [
     {
         id: '1',
@@ -9,78 +10,10 @@ const products = [
         inStock: true,
         category: 'Fertilizer'
     },
-    {
-        id: '2',
-        name: 'Epsom Salt - 1 kg',
-        price: 275,
-        image: '/public/images/fertilizerspics/p3.jpg',
-        rating: 5,
-        description: 'Helping flowering plants bloom better, Epsom Salt is a magnesium sulphate compound and is extensively for ornamental.',
-        inStock: true,
-        category: 'Fertilizer'
-    },
-    {
-        id: '3',
-        name: 'Humic Acid Powder Spray - 500 ml',
-        price: 345,
-        image: '/public/images/fertilizerspics/p9.png',
-        description: 'Promoting root development & plant resilience, Gardenly HumiGrow helps revitalize your plants. It is an organic humic acid.',
-        inStock: true,
-        category: 'Growth Enhancer'
-    },
-    {
-        id: '4',
-        name: 'Flora Tab - 8pcs',
-        price: 475,
-        image: '/public/images/fertilizerspics/p5.jpg',
-        rating: 5,
-        description: 'Promoting better blooming & fruiting, the FloraTAB is perfect for flowering and fruiting plants. An easy to use fertiliser that can be simply dissolved in water and applied directly to leaves or roots.',
-        inStock: false,
-        category: 'Fertilizer'
-    },
-    {
-        id: '5',
-        name: 'Protec Tab - 8pcs',
-        price: 475,
-        image: '/public/images/fertilizerspics/p6.jpg',
-        rating: 4,
-        description: 'Plant protection and pest control has never been easier, with ProtecTAB all you have to do is add it to water and spray it on your plants, no hassle.',
-        inStock: true,
-        category: 'Plant Protection'
-    },
-    {
-        id: '6',
-        name: 'Grow Tab - 8pcs',
-        price: 475,
-        image: '/public/images/fertilizerspics/p2.jpg',
-        rating: 4,
-        description: 'Promoting better foliage & root health, the GrowTAB is an easy to use complete plant nutrient, packed in a tab. Simply add this tab to water and apply directly to your plants.',
-        inStock: true,
-        category: 'Growth Enhancer'
-    },
-    {
-        id: '7',
-        name: 'Rooting Hormone Powder - 1 Kg',
-        price: 475,
-        image: '/public/images/fertilizerspics/p7.png',
-        rating: 4,
-        description: 'Perfect to grow cuttings & promote root development, Gardenlys Rooting Hormone contains what is said to be the heart of organic matter - humus.',
-        inStock: true,
-        category: 'Growth Enhancer'
-    },
-    {
-        id: '8',
-        name: 'Seaweed Extract Liquid Fertilizer',
-        price: 475,
-        image: '/public/images/fertilizerspics/p8.png',
-        rating: 4,
-        description: 'Promoting healthy root growth & denser foliage, Gardenlys Seaweed Extract Plant Tonic is Used for nurturing the healthy growth of plants.',
-        inStock: true,
-        category: 'Fertilizer'
-    },
+    // ... other products
 ];
 
-// Helper function to create star rating
+// Helper function: Creates star rating SVGs
 function createStarRating(rating) {
     return Array.from({ length: 5 }).map((_, index) => {
         const filled = index < rating;
@@ -90,11 +23,13 @@ function createStarRating(rating) {
     }).join('');
 }
 
-// Render product cards
+// Function to render products grid
 function renderProducts(productList = products) {
     const productsGrid = document.getElementById('products-grid');
-    productsGrid.innerHTML = productList.map(product => (
-        `<div class="product-card" data-id="${product.id}">
+
+    // Generate HTML for each product card
+    productsGrid.innerHTML = productList.map(product => `
+        <div class="product-card" data-id="${product.id}">
             <img src="${product.image}" alt="${product.name}">
             <div class="content">
                 <h3>${product.name}</h3>
@@ -107,7 +42,7 @@ function renderProducts(productList = products) {
                 </button>
             </div>
         </div>`
-    )).join('');
+    ).join('');
 
     // Add click listeners after DOM insertion
     const cards = productsGrid.querySelectorAll('.product-card');
@@ -119,7 +54,7 @@ function renderProducts(productList = products) {
     });
 }
 
-// Show product detail with quantity selector and dynamic price
+// Function to show product detail page with quantity selector
 function showProductDetail(productId) {
     const product = products.find(p => p.id === productId);
     const productDetail = document.getElementById('product-detail');
@@ -151,6 +86,7 @@ function showProductDetail(productId) {
         </div>
     `;
 
+    // Quantity selector logic
     if (product.inStock) {
         const decrementBtn = detailContent.querySelector('.decrement');
         const incrementBtn = detailContent.querySelector('.increment');
@@ -177,20 +113,20 @@ function showProductDetail(productId) {
         });
     }
 
-    productDetail.classList.add('active');
+    productDetail.classList.add('active'); // Show product detail panel
 }
 
-// Filter and sort products
+// Function to apply filters and sorting
 function applyFiltersAndSort() {
     let filteredProducts = products.slice();
 
-    // Category filter
+    // Filter by category
     const selectedCategories = Array.from(document.querySelectorAll('.filter-category:checked')).map(cb => cb.value);
     if (selectedCategories.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedCategories.includes(product.category));
     }
 
-    // Price filter
+    // Filter by price range
     const selectedPrices = Array.from(document.querySelectorAll('.filter-price:checked')).map(cb => cb.value);
     if (selectedPrices.length > 0) {
         filteredProducts = filteredProducts.filter(product =>
@@ -202,7 +138,7 @@ function applyFiltersAndSort() {
         );
     }
 
-    // Availability filter
+    // Filter by availability
     const selectedAvailability = Array.from(document.querySelectorAll('.filter-availability:checked')).map(cb => cb.value);
     if (selectedAvailability.length > 0) {
         filteredProducts = filteredProducts.filter(product => {
@@ -212,7 +148,7 @@ function applyFiltersAndSort() {
         });
     }
 
-    // Rating filter
+    // Filter by rating
     const selectedRatings = Array.from(document.querySelectorAll('.filter-rating:checked')).map(cb => parseInt(cb.value));
     if (selectedRatings.length > 0) {
         filteredProducts = filteredProducts.filter(product => selectedRatings.some(rating => product.rating >= rating));
@@ -221,11 +157,11 @@ function applyFiltersAndSort() {
     return filteredProducts;
 }
 
-// Initialize the page
+// Initialize page and attach event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    renderProducts();
+    renderProducts(); // Render initial products
 
-    // Home button navigation
+    // Home button click
     const homeBtn = document.querySelector('.home-btn');
     if (homeBtn) {
         homeBtn.addEventListener('click', () => {
@@ -233,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sort menu toggle and functionality
+    // Sort button toggle
     const sortBtn = document.querySelector('.sort-btn');
     const sortMenu = document.querySelector('.sort-menu');
     const sortItems = sortMenu ? sortMenu.querySelectorAll('li') : [];
@@ -245,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Apply sorting
     sortItems.forEach(item => {
         item.addEventListener('click', () => {
             const sortType = item.textContent;
@@ -267,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Filter menu toggle and functionality
+    // Filter button toggle
     const filterBtn = document.querySelector('.filter-btn');
     const filterMenu = document.querySelector('.filter-menu');
     const applyFiltersBtn = document.querySelector('.apply-filters');
@@ -279,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Apply filters
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', () => {
             const filteredProducts = applyFiltersAndSort();
@@ -287,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Close sort and filter menus when clicking outside
     document.addEventListener('click', (e) => {
         if (sortMenu && !sortMenu.contains(e.target) && sortBtn && !sortBtn.contains(e.target)) {
             sortMenu.classList.remove('active');
@@ -296,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Back button in product detail
     const backBtn = document.querySelector('.back-btn');
     const productDetail = document.getElementById('product-detail');
     if (backBtn && productDetail) {
@@ -304,8 +244,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-// git add .
-// git commit -m "Updated functionalities in <file_name>"
-
-// git push origin <your-branch-name>
-

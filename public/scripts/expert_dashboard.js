@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     const sections = {
         dashboard: document.getElementById('dashboardSection'),
         tickets: document.getElementById('ticketsSection'),
@@ -38,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to fetch ticket details');
             
             const ticket = await response.json();
-
             if (ticket) {
                 document.getElementById('ticketId').textContent = ticket._id;
                 document.getElementById('ticketRequester').textContent = ticket.requester;
@@ -143,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ resolution })
                     });
-                    
                     const result = await response.json();
                     
                     if (response.ok && result.success) {
@@ -161,9 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const cancelButton = document.getElementById('cancelResolution');
         if (cancelButton) {
-            cancelButton.addEventListener('click', () => {
-                showSection('tickets');
-            });
+            cancelButton.addEventListener('click', () => showSection('tickets'));
         }
     }
 

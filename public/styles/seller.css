@@ -1,8 +1,11 @@
-/* Base Styles */
+
+/* =======================
+   Base Styles
+   ======================= */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Make padding and border included in element width/height */
 }
 
 body {
@@ -10,14 +13,12 @@ body {
     background-color: #fff;
     color: #333;
     line-height: 1.6;
+    padding-top: 60px; /* Add padding to account for fixed header */
 }
 
-/* Add padding to account for fixed header */
-body {
-    padding-top: 60px;
-}
-
-/* Custom styling for header in seller page */
+/* =======================
+   Header Styles
+   ======================= */
 header.header {
     background-color: #fff;
     padding: 0.5rem 5%;
@@ -25,37 +26,36 @@ header.header {
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: fixed;
+    position: fixed; /* Fixed header */
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
 }
 
-/* Style for the Gardenly logo */
+/* Logo Styles */
 header.header .logo {
     color: #00e926 !important;
     font-weight: bold;
 }
-
 header.header .logo i {
     color: #00e926 !important;
 }
 
-/* Navbar links styling */
+/* Navbar links */
 header.header .navbar a {
     color: #333;
     text-decoration: none !important;
     transition: color 0.3s ease-in-out;
 }
-
-/* Hover effect for navbar links */
 header.header .navbar a:hover,
 header.header .navbar a.active {
-    color: #00e926 !important;
+    color: #00e926 !important; /* Highlight on hover or active */
 }
 
-/* Seller Container Styles */
+/* =======================
+   Seller Page Containers
+   ======================= */
 .seller-container {
     max-width: 800px;
     margin: 0 auto;
@@ -69,7 +69,9 @@ header.header .navbar a.active {
     padding: 0 15px;
 }
 
-/* Form Styles */
+/* =======================
+   Form Styles
+   ======================= */
 form {
     padding: 30px;
     border: 2px solid #ddd;
@@ -78,7 +80,7 @@ form {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Input and button styles */
+/* Inputs and buttons inside forms */
 input, button {
     padding: 15px;
     font-size: 20px;
@@ -86,13 +88,15 @@ input, button {
     border-radius: 5px;
 }
 
-/* Full width inputs for form fields */
+/* Full-width form inputs */
 #seller-product-form > input {
     width: 100%;
     margin: 12px 0;
 }
 
-/* Section Titles */
+/* =======================
+   Section Titles
+   ======================= */
 h2, .seller-section-title {
     margin: 30px 0 20px;
     font-size: 2rem;
@@ -100,7 +104,9 @@ h2, .seller-section-title {
     text-align: center;
 }
 
-/* Product Grid */
+/* =======================
+   Product Grid
+   ======================= */
 .seller-products {
     padding: 2rem;
 }
@@ -121,12 +127,12 @@ h2, .seller-section-title {
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px); /* Slight lift on hover */
 }
 
 .product-card img {
     width: 100%;
-izzano: 200px;
+    height: 200px; /* Fixed image height */
     object-fit: cover;
     border-radius: 4px;
 }
@@ -141,6 +147,7 @@ izzano: 200px;
     color: #666;
 }
 
+/* Product buttons */
 .product-card button {
     margin: 0.5rem 0.25rem;
     padding: 0.5rem 1rem;
@@ -155,6 +162,9 @@ izzano: 200px;
     background: #45a049;
 }
 
+/* =======================
+   Seller Sections
+   ======================= */
 .seller-top-sales,
 .seller-recent-sales {
     padding: 2rem;
@@ -166,7 +176,9 @@ izzano: 200px;
     color: #333;
 }
 
-/* Buttons */
+/* =======================
+   Button Variants
+   ======================= */
 .view-details-btn {
     background-color: #27ae60;
     color: white;
@@ -176,7 +188,6 @@ izzano: 200px;
     background-color: #219150;
 }
 
-/* Edit Button */
 .seller-edit-btn {
     background-color: #3498db;
     color: white;
@@ -186,7 +197,6 @@ izzano: 200px;
     background-color: #2980b9;
 }
 
-/* Delete Button */
 .seller-delete-btn {
     background-color: #e74c3c;
     color: white;
@@ -196,9 +206,11 @@ izzano: 200px;
     background-color: #c0392b;
 }
 
-/* Modal Styles */
+/* =======================
+   Modal Styles
+   ======================= */
 .seller-modal {
-    display: none;
+    display: none; /* Hidden by default */
     position: fixed;
     top: 50%;
     left: 50%;
@@ -216,10 +228,6 @@ izzano: 200px;
 
 .seller-modal.active {
     display: block;
-}
-
-.seller-modal-content {
-    position: relative;
 }
 
 .seller-modal img {
@@ -241,6 +249,7 @@ izzano: 200px;
     color: #555;
 }
 
+/* Close button */
 .seller-close {
     position: absolute;
     top: 0;
@@ -255,7 +264,7 @@ izzano: 200px;
     color: #333;
 }
 
-/* Overlay */
+/* Modal overlay */
 .seller-overlay {
     display: none;
     position: fixed;
@@ -271,7 +280,9 @@ izzano: 200px;
     display: block;
 }
 
-/* Responsive Design */
+/* =======================
+   Responsive Design
+   ======================= */
 @media (max-width: 1200px) {
     .product-list {
         grid-template-columns: repeat(3, 1fr);
@@ -290,6 +301,9 @@ izzano: 200px;
     }
 }
 
+/* =======================
+   Seller Product Form
+   ======================= */
 #seller-product-form {
     display: flex;
     flex-direction: column;

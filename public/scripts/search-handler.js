@@ -1,3 +1,4 @@
+
 // This file will handle the search functionality across all product categories
 
 // Function to collect all products from different categories
